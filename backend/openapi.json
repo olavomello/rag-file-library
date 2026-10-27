@@ -1,0 +1,1556 @@
+{
+  "components": {
+    "schemas": {
+      "Body_upload_document_api_v1_documents_upload_post": {
+        "properties": {
+          "file": {
+            "contentMediaType": "application/octet-stream",
+            "title": "File",
+            "type": "string"
+          }
+        },
+        "required": [
+          "file"
+        ],
+        "title": "Body_upload_document_api_v1_documents_upload_post",
+        "type": "object"
+      },
+      "ChatRequest": {
+        "properties": {
+          "question": {
+            "maxLength": 4000,
+            "minLength": 1,
+            "title": "Question",
+            "type": "string"
+          },
+          "top_k": {
+            "anyOf": [
+              {
+                "maximum": 50.0,
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Top K"
+          }
+        },
+        "required": [
+          "question"
+        ],
+        "title": "ChatRequest",
+        "type": "object"
+      },
+      "ChatResponse": {
+        "properties": {
+          "answer": {
+            "title": "Answer",
+            "type": "string"
+          },
+          "grounded": {
+            "title": "Grounded",
+            "type": "boolean"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/ChatSource"
+            },
+            "title": "Sources",
+            "type": "array"
+          }
+        },
+        "required": [
+          "answer",
+          "grounded",
+          "sources"
+        ],
+        "title": "ChatResponse",
+        "type": "object"
+      },
+      "ChatSource": {
+        "properties": {
+          "chunk_id": {
+            "title": "Chunk Id",
+            "type": "string"
+          },
+          "document_id": {
+            "title": "Document Id",
+            "type": "string"
+          },
+          "document_name": {
+            "title": "Document Name",
+            "type": "string"
+          },
+          "page_number": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page Number"
+          }
+        },
+        "required": [
+          "document_id",
+          "document_name",
+          "chunk_id"
+        ],
+        "title": "ChatSource",
+        "type": "object"
+      },
+      "ComponentHealthResponse": {
+        "description": "Health response for a single infrastructure component.",
+        "properties": {
+          "component": {
+            "title": "Component",
+            "type": "string"
+          },
+          "detail": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Detail"
+          },
+          "metadata": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "default": {},
+            "title": "Metadata",
+            "type": "object"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "component",
+          "status"
+        ],
+        "title": "ComponentHealthResponse",
+        "type": "object"
+      },
+      "DashboardStatsResponse": {
+        "properties": {
+          "active_jobs": {
+            "title": "Active Jobs",
+            "type": "integer"
+          },
+          "deleting": {
+            "title": "Deleting",
+            "type": "integer"
+          },
+          "embedding_model": {
+            "title": "Embedding Model",
+            "type": "string"
+          },
+          "failed": {
+            "title": "Failed",
+            "type": "integer"
+          },
+          "generation_model": {
+            "title": "Generation Model",
+            "type": "string"
+          },
+          "indexed": {
+            "title": "Indexed",
+            "type": "integer"
+          },
+          "pending": {
+            "title": "Pending",
+            "type": "integer"
+          },
+          "processing": {
+            "title": "Processing",
+            "type": "integer"
+          },
+          "total_chunks": {
+            "title": "Total Chunks",
+            "type": "integer"
+          },
+          "total_documents": {
+            "title": "Total Documents",
+            "type": "integer"
+          },
+          "uploaded": {
+            "title": "Uploaded",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "total_documents",
+          "uploaded",
+          "pending",
+          "processing",
+          "indexed",
+          "failed",
+          "deleting",
+          "total_chunks",
+          "active_jobs",
+          "generation_model",
+          "embedding_model"
+        ],
+        "title": "DashboardStatsResponse",
+        "type": "object"
+      },
+      "DocumentContentResponse": {
+        "properties": {
+          "char_count": {
+            "title": "Char Count",
+            "type": "integer"
+          },
+          "content": {
+            "title": "Content",
+            "type": "string"
+          },
+          "document_id": {
+            "title": "Document Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "document_id",
+          "content",
+          "char_count"
+        ],
+        "title": "DocumentContentResponse",
+        "type": "object"
+      },
+      "DocumentListResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/DocumentResponse"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total"
+        ],
+        "title": "DocumentListResponse",
+        "type": "object"
+      },
+      "DocumentResponse": {
+        "properties": {
+          "checksum_sha256": {
+            "title": "Checksum Sha256",
+            "type": "string"
+          },
+          "chunk_count": {
+            "title": "Chunk Count",
+            "type": "integer"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "error_message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Message"
+          },
+          "extension": {
+            "title": "Extension",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "indexed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Indexed At"
+          },
+          "mime_type": {
+            "title": "Mime Type",
+            "type": "string"
+          },
+          "original_name": {
+            "title": "Original Name",
+            "type": "string"
+          },
+          "size_bytes": {
+            "title": "Size Bytes",
+            "type": "integer"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "original_name",
+          "mime_type",
+          "extension",
+          "size_bytes",
+          "checksum_sha256",
+          "status",
+          "chunk_count",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "DocumentResponse",
+        "type": "object"
+      },
+      "DocumentStatus": {
+        "description": "Lifecycle states of a document.",
+        "enum": [
+          "uploaded",
+          "pending",
+          "processing",
+          "indexed",
+          "failed",
+          "deleting"
+        ],
+        "title": "DocumentStatus",
+        "type": "string"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "JobListResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/JobResponse"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total"
+        ],
+        "title": "JobListResponse",
+        "type": "object"
+      },
+      "JobResponse": {
+        "properties": {
+          "completed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "document_id": {
+            "title": "Document Id",
+            "type": "string"
+          },
+          "error_message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Message"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "progress": {
+            "title": "Progress",
+            "type": "number"
+          },
+          "retry_count": {
+            "title": "Retry Count",
+            "type": "integer"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "document_id",
+          "status",
+          "progress",
+          "retry_count"
+        ],
+        "title": "JobResponse",
+        "type": "object"
+      },
+      "JobStatus": {
+        "description": "Lifecycle states of an indexing job.",
+        "enum": [
+          "pending",
+          "running",
+          "completed",
+          "failed",
+          "cancelled"
+        ],
+        "title": "JobStatus",
+        "type": "string"
+      },
+      "LivenessResponse": {
+        "description": "Basic application liveness response.",
+        "properties": {
+          "app_env": {
+            "title": "App Env",
+            "type": "string"
+          },
+          "app_name": {
+            "title": "App Name",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "app_name",
+          "app_env",
+          "version"
+        ],
+        "title": "LivenessResponse",
+        "type": "object"
+      },
+      "ModelsResponse": {
+        "properties": {
+          "available_models": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Available Models",
+            "type": "array"
+          },
+          "embedding_available": {
+            "title": "Embedding Available",
+            "type": "boolean"
+          },
+          "embedding_model": {
+            "title": "Embedding Model",
+            "type": "string"
+          },
+          "generation_available": {
+            "title": "Generation Available",
+            "type": "boolean"
+          },
+          "generation_model": {
+            "title": "Generation Model",
+            "type": "string"
+          },
+          "ollama_available": {
+            "title": "Ollama Available",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "generation_model",
+          "embedding_model",
+          "ollama_available",
+          "generation_available",
+          "embedding_available",
+          "available_models"
+        ],
+        "title": "ModelsResponse",
+        "type": "object"
+      },
+      "ModelsStatusResponse": {
+        "properties": {
+          "embedding_available": {
+            "title": "Embedding Available",
+            "type": "boolean"
+          },
+          "embedding_model": {
+            "title": "Embedding Model",
+            "type": "string"
+          },
+          "generation_available": {
+            "title": "Generation Available",
+            "type": "boolean"
+          },
+          "generation_model": {
+            "title": "Generation Model",
+            "type": "string"
+          },
+          "ollama_available": {
+            "title": "Ollama Available",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "generation_model",
+          "embedding_model",
+          "ollama_available",
+          "generation_available",
+          "embedding_available"
+        ],
+        "title": "ModelsStatusResponse",
+        "type": "object"
+      },
+      "SearchResultResponse": {
+        "properties": {
+          "chunk_id": {
+            "title": "Chunk Id",
+            "type": "string"
+          },
+          "distance": {
+            "title": "Distance",
+            "type": "number"
+          },
+          "document_id": {
+            "title": "Document Id",
+            "type": "string"
+          },
+          "document_name": {
+            "title": "Document Name",
+            "type": "string"
+          },
+          "excerpt": {
+            "title": "Excerpt",
+            "type": "string"
+          },
+          "metadata": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "default": {},
+            "title": "Metadata",
+            "type": "object"
+          },
+          "page_number": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page Number"
+          }
+        },
+        "required": [
+          "document_id",
+          "document_name",
+          "chunk_id",
+          "excerpt",
+          "distance"
+        ],
+        "title": "SearchResultResponse",
+        "type": "object"
+      },
+      "SemanticSearchRequest": {
+        "properties": {
+          "document_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Document Ids"
+          },
+          "query": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Query",
+            "type": "string"
+          },
+          "top_k": {
+            "anyOf": [
+              {
+                "maximum": 50.0,
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Top K"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "SemanticSearchRequest",
+        "type": "object"
+      },
+      "SemanticSearchResponse": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/SearchResultResponse"
+            },
+            "title": "Results",
+            "type": "array"
+          }
+        },
+        "required": [
+          "query",
+          "count",
+          "results"
+        ],
+        "title": "SemanticSearchResponse",
+        "type": "object"
+      },
+      "SettingsResponse": {
+        "properties": {
+          "app_env": {
+            "title": "App Env",
+            "type": "string"
+          },
+          "app_name": {
+            "title": "App Name",
+            "type": "string"
+          },
+          "chunk_overlap": {
+            "title": "Chunk Overlap",
+            "type": "integer"
+          },
+          "chunk_size": {
+            "title": "Chunk Size",
+            "type": "integer"
+          },
+          "context_window": {
+            "title": "Context Window",
+            "type": "integer"
+          },
+          "embedding_model": {
+            "title": "Embedding Model",
+            "type": "string"
+          },
+          "generation_concurrency": {
+            "title": "Generation Concurrency",
+            "type": "integer"
+          },
+          "generation_model": {
+            "title": "Generation Model",
+            "type": "string"
+          },
+          "indexing_concurrency": {
+            "title": "Indexing Concurrency",
+            "type": "integer"
+          },
+          "max_output_tokens": {
+            "title": "Max Output Tokens",
+            "type": "integer"
+          },
+          "max_upload_size_mb": {
+            "title": "Max Upload Size Mb",
+            "type": "integer"
+          },
+          "rag_max_context_chars": {
+            "title": "Rag Max Context Chars",
+            "type": "integer"
+          },
+          "rag_max_context_chunks": {
+            "title": "Rag Max Context Chunks",
+            "type": "integer"
+          },
+          "search_top_k": {
+            "title": "Search Top K",
+            "type": "integer"
+          },
+          "temperature": {
+            "title": "Temperature",
+            "type": "number"
+          }
+        },
+        "required": [
+          "app_name",
+          "app_env",
+          "generation_model",
+          "embedding_model",
+          "temperature",
+          "max_output_tokens",
+          "context_window",
+          "chunk_size",
+          "chunk_overlap",
+          "search_top_k",
+          "rag_max_context_chunks",
+          "rag_max_context_chars",
+          "max_upload_size_mb",
+          "indexing_concurrency",
+          "generation_concurrency"
+        ],
+        "title": "SettingsResponse",
+        "type": "object"
+      },
+      "UploadResponse": {
+        "properties": {
+          "document": {
+            "$ref": "#/components/schemas/DocumentResponse"
+          },
+          "is_duplicate": {
+            "title": "Is Duplicate",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "document",
+          "is_duplicate"
+        ],
+        "title": "UploadResponse",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "description": "Local, private Retrieval-Augmented Generation over your documents.",
+    "title": "Private RAG",
+    "version": "0.1.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/v1/chat": {
+      "post": {
+        "operationId": "chat_api_v1_chat_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Chat",
+        "tags": [
+          "chat"
+        ]
+      }
+    },
+    "/api/v1/chat/stream": {
+      "post": {
+        "operationId": "chat_stream_api_v1_chat_stream_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Chat Stream",
+        "tags": [
+          "chat"
+        ]
+      }
+    },
+    "/api/v1/dashboard/stats": {
+      "get": {
+        "operationId": "dashboard_stats_api_v1_dashboard_stats_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardStatsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Dashboard Stats",
+        "tags": [
+          "dashboard"
+        ]
+      }
+    },
+    "/api/v1/documents": {
+      "get": {
+        "operationId": "list_documents_api_v1_documents_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/DocumentStatus"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maximum": 500,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Limit"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentListResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Documents",
+        "tags": [
+          "documents"
+        ]
+      }
+    },
+    "/api/v1/documents/upload": {
+      "post": {
+        "operationId": "upload_document_api_v1_documents_upload_post",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_upload_document_api_v1_documents_upload_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Upload Document",
+        "tags": [
+          "documents"
+        ]
+      }
+    },
+    "/api/v1/documents/{document_id}": {
+      "delete": {
+        "operationId": "delete_document_api_v1_documents__document_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "document_id",
+            "required": true,
+            "schema": {
+              "title": "Document Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete Document",
+        "tags": [
+          "documents"
+        ]
+      },
+      "get": {
+        "operationId": "get_document_api_v1_documents__document_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "document_id",
+            "required": true,
+            "schema": {
+              "title": "Document Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Document",
+        "tags": [
+          "documents"
+        ]
+      }
+    },
+    "/api/v1/documents/{document_id}/content": {
+      "get": {
+        "operationId": "get_document_content_api_v1_documents__document_id__content_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "document_id",
+            "required": true,
+            "schema": {
+              "title": "Document Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentContentResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Document Content",
+        "tags": [
+          "documents"
+        ]
+      }
+    },
+    "/api/v1/documents/{document_id}/download": {
+      "get": {
+        "operationId": "download_document_api_v1_documents__document_id__download_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "document_id",
+            "required": true,
+            "schema": {
+              "title": "Document Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Download Document",
+        "tags": [
+          "documents"
+        ]
+      }
+    },
+    "/api/v1/documents/{document_id}/reindex": {
+      "post": {
+        "operationId": "reindex_document_api_v1_documents__document_id__reindex_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "document_id",
+            "required": true,
+            "schema": {
+              "title": "Document Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Reindex Document",
+        "tags": [
+          "documents"
+        ]
+      }
+    },
+    "/api/v1/health": {
+      "get": {
+        "description": "Liveness probe: confirms the API process is up (no external dependencies).",
+        "operationId": "liveness_api_v1_health_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LivenessResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Liveness",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/api/v1/health/chroma": {
+      "get": {
+        "description": "Readiness probe for the embedded ChromaDB store.",
+        "operationId": "chroma_health_api_v1_health_chroma_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComponentHealthResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Chroma Health",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/api/v1/health/ollama": {
+      "get": {
+        "description": "Readiness probe for the local Ollama instance.",
+        "operationId": "ollama_health_api_v1_health_ollama_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComponentHealthResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Ollama Health",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/api/v1/indexing/jobs": {
+      "get": {
+        "operationId": "list_jobs_api_v1_indexing_jobs_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/JobStatus"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobListResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Jobs",
+        "tags": [
+          "indexing"
+        ]
+      }
+    },
+    "/api/v1/indexing/jobs/{job_id}": {
+      "get": {
+        "operationId": "get_job_api_v1_indexing_jobs__job_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "job_id",
+            "required": true,
+            "schema": {
+              "title": "Job Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Job",
+        "tags": [
+          "indexing"
+        ]
+      }
+    },
+    "/api/v1/indexing/jobs/{job_id}/retry": {
+      "post": {
+        "operationId": "retry_job_api_v1_indexing_jobs__job_id__retry_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "job_id",
+            "required": true,
+            "schema": {
+              "title": "Job Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Retry Job",
+        "tags": [
+          "indexing"
+        ]
+      }
+    },
+    "/api/v1/models": {
+      "get": {
+        "operationId": "list_models_api_v1_models_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModelsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Models",
+        "tags": [
+          "models"
+        ]
+      }
+    },
+    "/api/v1/models/status": {
+      "get": {
+        "operationId": "models_status_api_v1_models_status_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModelsStatusResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Models Status",
+        "tags": [
+          "models"
+        ]
+      }
+    },
+    "/api/v1/search/semantic": {
+      "post": {
+        "operationId": "semantic_search_api_v1_search_semantic_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SemanticSearchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SemanticSearchResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Semantic Search",
+        "tags": [
+          "search"
+        ]
+      }
+    },
+    "/api/v1/settings": {
+      "get": {
+        "operationId": "get_settings_api_v1_settings_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Get Settings",
+        "tags": [
+          "settings"
+        ]
+      }
+    }
+  }
+}

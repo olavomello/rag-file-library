@@ -9,3 +9,4 @@ Records of significant architectural decisions for Private RAG. New ADRs start f
 - [0004 — Semantic search](./0004-semantic-search.md) — Accepted
 - [0005 — Adopt the AI-Dash governance layer](./0005-adopt-ai-dash-governance-layer.md) — Accepted
 - [0006 — RAG chat engine](./0006-rag-chat-engine.md) — Accepted
+- [0007 — Frontend application and shared OpenAPI spec](./0007-frontend-application-and-openapi-spec.md) — Accepted

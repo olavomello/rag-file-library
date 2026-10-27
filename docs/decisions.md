@@ -11,3 +11,5 @@ don't warrant a full ADR; significant ones link to an ADR in `docs/adr/`.
 - 2026-10-27 — Commit once per completed build phase on its `feat/phase-N-*` branch — keeps phase history reviewable; push/merge on request.
 - 2026-10-27 — Adopt the AI-Dash governance layer (management-docs scope only) — fills the project-management gap without changing the app or agent runtime (ADR-0005).
 - 2026-10-27 — RAG chat answers only from retrieved context, cites only real sources, and skips the LLM when retrieval is empty — grounded, injection-safe answering that keeps search and generation independent (ADR-0006).
+- 2026-10-27 — Frontend is feature-based with a typed service layer; chat streams over NDJSON; Settings is read-only for now (ADR-0007).
+- 2026-10-27 — Commit the OpenAPI spec at backend/openapi.json (Insomnia/Postman importable) and enforce freshness with a contract test; regenerate via scripts/export_openapi.py after any endpoint change (ADR-0007).

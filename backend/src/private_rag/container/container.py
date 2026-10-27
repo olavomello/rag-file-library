@@ -22,6 +22,9 @@ from private_rag.application.services.token_counter import WhitespaceTokenCounte
 from private_rag.application.use_cases.chat.answer_question import (
     AnswerQuestionUseCase,
 )
+from private_rag.application.use_cases.dashboard.get_stats import (
+    GetDashboardStatsUseCase,
+)
 from private_rag.application.use_cases.documents.delete_document import (
     DeleteDocumentUseCase,
 )
@@ -234,6 +237,18 @@ class Container:
         return OllamaModelCatalog(
             base_url=self._settings.ollama_base_url,
             timeout_seconds=min(self._settings.ollama_request_timeout_seconds, 5.0),
+        )
+
+    # --- Dashboard ---
+
+    @cached_property
+    def get_dashboard_stats_use_case(self) -> GetDashboardStatsUseCase:
+        return GetDashboardStatsUseCase(
+            documents=self.document_repository,
+            chunks=self.chunk_repository,
+            jobs=self.indexing_job_repository,
+            generation_model=self._settings.ollama_generation_model,
+            embedding_model=self._settings.ollama_embedding_model,
         )
 
     # --- Health probes ---

@@ -25,7 +25,9 @@ rag-file-library/
 │       │   └── clock.py
 │       ├── presentation/            # FastAPI: api/routes, api/schemas, api/dependencies, exception_handlers
 │       └── container/               # composition root (explicit DI)
-│   └── tests/                       # unit/, integration/, e2e/, contract/, fixtures/
+│   ├── openapi.json                 # committed OpenAPI spec (Insomnia/Postman import)
+│   ├── scripts/export_openapi.py    # regenerates openapi.json from the live app
+│   └── tests/                       # unit/, integration/, e2e/, contract/ (openapi freshness), fixtures/
 │
 ├── frontend/                        # React + Vite + TS + Tailwind + TanStack Query
 │   └── src/                         # app/, components/, features/{dashboard,documents,search,chat,settings}, services/, types/

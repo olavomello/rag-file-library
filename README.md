@@ -75,6 +75,20 @@ npm run dev
 npm test
 ```
 
+## API spec (Insomnia / Postman)
+
+The full OpenAPI spec is committed at [`backend/openapi.json`](backend/openapi.json) —
+import it into Insomnia, Postman, or any OpenAPI reader. It is also served live at
+http://127.0.0.1:8000/openapi.json, with Swagger UI at http://127.0.0.1:8000/docs.
+
+Regenerate the committed spec after changing any endpoint (a contract test fails if it
+is stale):
+
+```bash
+cd backend
+uv run python scripts/export_openapi.py
+```
+
 ## Project layout
 
 ```

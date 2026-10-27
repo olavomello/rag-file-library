@@ -11,7 +11,18 @@ from __future__ import annotations
 from functools import cached_property
 from pathlib import Path
 
+from private_rag.application.ports.clock import Clock
 from private_rag.application.ports.health import HealthProbe
+from private_rag.application.use_cases.documents.delete_document import (
+    DeleteDocumentUseCase,
+)
+from private_rag.application.use_cases.documents.get_document import GetDocumentUseCase
+from private_rag.application.use_cases.documents.list_documents import (
+    ListDocumentsUseCase,
+)
+from private_rag.application.use_cases.documents.upload_document import (
+    UploadDocumentUseCase,
+)
 from private_rag.domain.repositories.chunk_repository import ChunkVectorRepository
 from private_rag.domain.repositories.document_repository import DocumentRepository
 from private_rag.domain.repositories.indexing_job_repository import (
@@ -21,6 +32,7 @@ from private_rag.infrastructure.chroma.chunk_repository import ChromaChunkReposi
 from private_rag.infrastructure.chroma.client import ChromaClientProvider
 from private_rag.infrastructure.chroma.document_registry import ChromaDocumentRegistry
 from private_rag.infrastructure.chroma.health_probe import ChromaHealthProbe
+from private_rag.infrastructure.clock import SystemClock
 from private_rag.infrastructure.filesystem.file_storage import FileStorage
 from private_rag.infrastructure.filesystem.json_indexing_job_repository import (
     JsonIndexingJobRepository,
@@ -62,6 +74,38 @@ class Container:
     @cached_property
     def indexing_job_repository(self) -> IndexingJobRepository:
         return JsonIndexingJobRepository(self._settings.jobs_dir)
+
+    @cached_property
+    def clock(self) -> Clock:
+        return SystemClock()
+
+    # --- Document use cases ---
+
+    @cached_property
+    def upload_document_use_case(self) -> UploadDocumentUseCase:
+        return UploadDocumentUseCase(
+            documents=self.document_repository,
+            storage=self.file_storage,
+            clock=self.clock,
+            max_upload_size_bytes=self._settings.max_upload_size_bytes,
+        )
+
+    @cached_property
+    def list_documents_use_case(self) -> ListDocumentsUseCase:
+        return ListDocumentsUseCase(documents=self.document_repository)
+
+    @cached_property
+    def get_document_use_case(self) -> GetDocumentUseCase:
+        return GetDocumentUseCase(documents=self.document_repository)
+
+    @cached_property
+    def delete_document_use_case(self) -> DeleteDocumentUseCase:
+        return DeleteDocumentUseCase(
+            documents=self.document_repository,
+            chunks=self.chunk_repository,
+            jobs=self.indexing_job_repository,
+            storage=self.file_storage,
+        )
 
     # --- Health probes ---
 

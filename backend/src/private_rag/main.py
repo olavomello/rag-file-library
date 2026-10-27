@@ -11,6 +11,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from private_rag import __version__
 from private_rag.container.container import Container
 from private_rag.presentation.api.router import api_router
+from private_rag.presentation.exception_handlers.handlers import (
+    register_exception_handlers,
+)
 from private_rag.settings import Settings
 
 
@@ -52,6 +55,7 @@ def create_app(
         allow_headers=["*"],
     )
 
+    register_exception_handlers(app)
     app.include_router(api_router)
     return app
 

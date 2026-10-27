@@ -4,7 +4,8 @@ from __future__ import annotations
 
 from fastapi import APIRouter
 
-from private_rag.presentation.api.routes import health
+from private_rag.presentation.api.routes import documents, health
 
 api_router = APIRouter(prefix="/api/v1")
 api_router.include_router(health.router)
+api_router.include_router(documents.router)

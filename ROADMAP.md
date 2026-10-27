@@ -40,19 +40,21 @@ clean, component tests passing, production build working.
   with mocks per `AGENTS.md` §27; real runs are pending `ollama pull qwen3:0.6b`
   and `ollama pull embeddinggemma`.
 
-## Known deviations from `AGENTS.md`
+## AI-Dash base
 
-- **AI-Dash starter not used.** `AGENTS.md` names `olavomello/ai-project-starter`
-  as the Priority-1 base, but that repository returns **HTTP 404** (private,
-  renamed, or not yet created), so it could not be read. The architecture was built
-  directly from the self-contained `AGENTS.md` spec. See
-  [ADR-0001](docs/decisions/0001-foundation-and-environment-constraints.md). If the
-  starter becomes accessible, its base/security/agent-management patterns should be
-  reconciled against this foundation in a follow-up ADR.
+`AGENTS.md` names `olavomello/ai-project-starter` (AI-Dash) as the Priority-1 base.
+It was initially unreachable (HTTP 404), so Phases 1–5 were built directly from the
+self-contained `AGENTS.md` spec ([ADR-0001](docs/adr/0001-foundation-and-environment-constraints.md)).
+The repository is now public, and its **governance layer** (ADR structure, decisions
+log, task taxonomy, repo map, `AGENT_TEAM.md`, SemVer, guides) has been adopted at the
+management-docs scope ([ADR-0005](docs/adr/0005-adopt-ai-dash-governance-layer.md)).
+The enforcement layer (Claude Code hooks, the "gate" workflow, dashboard, CLI/scripts)
+was deliberately **not** adopted yet and can be in a follow-up ADR.
 
 ## Architecture decision records
 
-- [0001 — Foundation & environment constraints](docs/decisions/0001-foundation-and-environment-constraints.md)
-- [0002 — Domain model & storage design](docs/decisions/0002-domain-model-and-storage-design.md)
-- [0003 — Ingestion pipeline & background indexing](docs/decisions/0003-ingestion-pipeline-and-background-indexing.md)
-- [0004 — Semantic search](docs/decisions/0004-semantic-search.md)
+- [0001 — Foundation & environment constraints](docs/adr/0001-foundation-and-environment-constraints.md)
+- [0002 — Domain model & storage design](docs/adr/0002-domain-model-and-storage-design.md)
+- [0003 — Ingestion pipeline & background indexing](docs/adr/0003-ingestion-pipeline-and-background-indexing.md)
+- [0004 — Semantic search](docs/adr/0004-semantic-search.md)
+- [0005 — Adopt the AI-Dash governance layer](docs/adr/0005-adopt-ai-dash-governance-layer.md)

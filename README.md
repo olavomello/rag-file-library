@@ -95,6 +95,6 @@ rag-file-library/
 
 ## Status
 
-Under active, phased implementation. See [docs/decisions](docs/decisions/) for
+Under active, phased implementation. See [docs/adr](docs/adr/) for
 architecture decision records and the implementation report (added on completion) for
 the verified vs. unverified feature matrix.

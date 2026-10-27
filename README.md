@@ -89,6 +89,20 @@ cd backend
 uv run python scripts/export_openapi.py
 ```
 
+## Continuous checks
+
+Every push is gated:
+
+- A **`pre-push` git hook** (`scripts/hooks/pre-push`, enabled by `scripts\setup.ps1`
+  via `core.hooksPath`) runs fast checks — frontend lockfile sync, typecheck, lint, and
+  backend ruff + mypy — and blocks the push on failure. Bypass once with
+  `git push --no-verify`.
+- **CI** (`.github/workflows/ci.yml`) runs the full backend and frontend suites.
+- The **`agent-test`** agent (`.claude/agents/agent-test.md`) performs post-push
+  verification and fixes: it reruns the full gate, checks CI, and repairs problems
+  (lockfile drift, failing tests, lint/type errors, stale `openapi.json`). Run it after
+  pushing, or whenever CI reports a failure.
+
 ## Project layout
 
 ```

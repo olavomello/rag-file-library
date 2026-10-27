@@ -1,0 +1,37 @@
+#!/usr/bin/env sh
+# Private RAG pre-push gate — runs on every `git push`.
+# Fast, resilient checks that catch the usual CI breakers (lockfile drift, lint,
+# type errors) before the push leaves the machine. The full test suites and build
+# run in CI and via the `agent-test` agent, which also fixes problems.
+#
+# Enabled via: git config core.hooksPath scripts/hooks  (done by scripts/setup.ps1).
+# Bypass once (discouraged): git push --no-verify
+
+set -e
+ROOT=$(git rev-parse --show-toplevel)
+cd "$ROOT"
+
+have() { command -v "$1" >/dev/null 2>&1; }
+
+if have npm; then
+  echo "[pre-push] Frontend: lockfile sync..."
+  ( cd frontend && npm install --package-lock-only --no-audit --silent )
+  if ! git diff --quiet frontend/package-lock.json; then
+    echo "[pre-push] frontend/package-lock.json was out of sync and has been updated."
+    echo "[pre-push] Commit it, then push again (keeps CI's 'npm ci' working)."
+    exit 1
+  fi
+  echo "[pre-push] Frontend: typecheck + lint..."
+  ( cd frontend && npm run typecheck && npm run lint )
+else
+  echo "[pre-push] npm not found; skipping frontend checks."
+fi
+
+if have uv; then
+  echo "[pre-push] Backend: ruff + mypy..."
+  ( cd backend && uv run ruff check . && uv run mypy )
+else
+  echo "[pre-push] uv not found; skipping backend checks."
+fi
+
+echo "[pre-push] OK — full test suites run in CI and via the agent-test agent."

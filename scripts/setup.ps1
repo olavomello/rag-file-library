@@ -29,6 +29,12 @@ foreach ($dir in @('uploads', 'chroma', 'jobs', 'temp', 'config')) {
 }
 Write-Host 'Data directories ready.' -ForegroundColor Green
 
+Write-Section 'Configuring git hooks'
+Push-Location $Root
+git config core.hooksPath scripts/hooks
+Pop-Location
+Write-Host 'Pre-push gate enabled (scripts/hooks). Bypass once with: git push --no-verify' -ForegroundColor Green
+
 Write-Section 'Installing backend dependencies (uv)'
 Push-Location (Join-Path $Root 'backend')
 uv sync --extra dev

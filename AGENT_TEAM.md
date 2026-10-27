@@ -49,6 +49,14 @@ A sub-agent returns a short summary (≈20 lines max) with `file:line` reference
 raw file dumps or transcripts. It does not commit, tag, edit `VERSION`, or change CI.
 Findings return to the caller, who decides.
 
+## Post-push verification (agent-test)
+
+`.claude/agents/agent-test.md` defines **agent-test**: a verification-and-fix agent run
+after every push (and whenever CI fails). It reruns the full gate, inspects CI, and
+fixes problems (lockfile drift, failing tests, lint/type errors, a stale OpenAPI spec),
+then commits and pushes the fix. A committed `pre-push` hook (`scripts/hooks/pre-push`)
+is the automatic trigger/guard; agent-test does the deeper conference and repairs.
+
 ## The quality gate
 
 Before a change is considered done, the gate must pass: backend `ruff`, `mypy`, and

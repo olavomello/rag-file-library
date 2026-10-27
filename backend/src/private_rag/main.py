@@ -9,12 +9,29 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from private_rag import __version__
+from private_rag.application.services.settings_overrides import apply_overrides
 from private_rag.container.container import Container
+from private_rag.infrastructure.filesystem.json_settings_overrides import (
+    JsonSettingsOverridesStore,
+)
 from private_rag.presentation.api.router import api_router
 from private_rag.presentation.exception_handlers.handlers import (
     register_exception_handlers,
 )
 from private_rag.settings import Settings
+
+
+def _load_effective_settings() -> Settings:
+    """Load settings from the environment, then apply any persisted overrides."""
+    base = Settings()
+    overrides = JsonSettingsOverridesStore(base.config_dir).load()
+    if not overrides:
+        return base
+    try:
+        return apply_overrides(base, overrides)
+    except Exception:
+        # Corrupt/invalid overrides must never prevent startup; fall back to env.
+        return base
 
 
 def create_app(
@@ -28,7 +45,7 @@ def create_app(
             from the environment / ``.env`` file.
         container: Optional pre-built container, primarily for testing with fakes.
     """
-    settings = settings or Settings()
+    settings = settings or _load_effective_settings()
     resolved_container = container or Container(settings)
 
     @asynccontextmanager

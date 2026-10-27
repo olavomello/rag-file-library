@@ -66,3 +66,4 @@ was deliberately **not** adopted yet and can be in a follow-up ADR.
 - [0005 — Adopt the AI-Dash governance layer](docs/adr/0005-adopt-ai-dash-governance-layer.md)
 - [0006 — RAG chat engine](docs/adr/0006-rag-chat-engine.md)
 - [0007 — Frontend application and shared OpenAPI spec](docs/adr/0007-frontend-application-and-openapi-spec.md)
+- [0008 — Mutable settings via persisted overrides](docs/adr/0008-mutable-settings-via-persisted-overrides.md)

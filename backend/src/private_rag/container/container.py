@@ -44,6 +44,9 @@ from private_rag.application.use_cases.indexing.index_document import (
 from private_rag.application.use_cases.search.semantic_search import (
     SemanticSearchUseCase,
 )
+from private_rag.application.use_cases.settings.update_settings import (
+    UpdateSettingsUseCase,
+)
 from private_rag.domain.repositories.chunk_repository import ChunkVectorRepository
 from private_rag.domain.repositories.document_repository import DocumentRepository
 from private_rag.domain.repositories.indexing_job_repository import (
@@ -57,6 +60,9 @@ from private_rag.infrastructure.clock import SystemClock
 from private_rag.infrastructure.filesystem.file_storage import FileStorage
 from private_rag.infrastructure.filesystem.json_indexing_job_repository import (
     JsonIndexingJobRepository,
+)
+from private_rag.infrastructure.filesystem.json_settings_overrides import (
+    JsonSettingsOverridesStore,
 )
 from private_rag.infrastructure.indexing.worker import IndexingWorker
 from private_rag.infrastructure.ollama.embedding_provider import OllamaEmbeddingProvider
@@ -237,6 +243,18 @@ class Container:
         return OllamaModelCatalog(
             base_url=self._settings.ollama_base_url,
             timeout_seconds=min(self._settings.ollama_request_timeout_seconds, 5.0),
+        )
+
+    # --- Settings ---
+
+    @cached_property
+    def settings_overrides_store(self) -> JsonSettingsOverridesStore:
+        return JsonSettingsOverridesStore(self._settings.config_dir)
+
+    @cached_property
+    def update_settings_use_case(self) -> UpdateSettingsUseCase:
+        return UpdateSettingsUseCase(
+            store=self.settings_overrides_store, settings=self._settings
         )
 
     # --- Dashboard ---

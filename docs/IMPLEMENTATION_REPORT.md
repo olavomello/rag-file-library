@@ -92,7 +92,9 @@ worker thread so the API stays responsive during indexing.
 ## 10. Known limitations
 
 - No OCR: scanned PDFs with no text layer are reported, not processed.
-- Settings are read-only in the UI (a write/PATCH flow is deferred).
+- Settings can be changed via `PATCH /settings` (persisted overrides, applied on
+  restart; see ADR-0008); the UI Settings page is still read-only, and live hot-reload
+  is not implemented.
 - Single default knowledge base (the model and repositories leave room for more).
 - AI-Dash enforcement layer (hooks, gate workflow, dashboard, CLI) was not adopted;
   only the management-docs layer (ADR-0005).

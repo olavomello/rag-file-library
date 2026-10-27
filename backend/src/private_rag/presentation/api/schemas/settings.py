@@ -5,7 +5,7 @@ Internal filesystem paths are intentionally excluded (AGENTS.md §20).
 
 from __future__ import annotations
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from private_rag.settings import Settings
 
@@ -46,3 +46,28 @@ class SettingsResponse(BaseModel):
             indexing_concurrency=settings.indexing_concurrency,
             generation_concurrency=settings.generation_concurrency,
         )
+
+
+class SettingsUpdateRequest(BaseModel):
+    """Partial settings update. Any field left unset is unchanged."""
+
+    generation_model: str | None = Field(default=None, min_length=1)
+    embedding_model: str | None = Field(default=None, min_length=1)
+    temperature: float | None = Field(default=None, ge=0.0, le=2.0)
+    max_output_tokens: int | None = Field(default=None, ge=1)
+    context_window: int | None = Field(default=None, ge=256)
+    chunk_size: int | None = Field(default=None, ge=1)
+    chunk_overlap: int | None = Field(default=None, ge=0)
+    search_top_k: int | None = Field(default=None, ge=1)
+    rag_max_context_chunks: int | None = Field(default=None, ge=1)
+    rag_max_context_chars: int | None = Field(default=None, ge=500)
+    max_upload_size_mb: int | None = Field(default=None, ge=1)
+    indexing_concurrency: int | None = Field(default=None, ge=1)
+    generation_concurrency: int | None = Field(default=None, ge=1)
+
+
+class SettingsUpdateResponse(BaseModel):
+    settings: SettingsResponse
+    requires_restart: bool
+    requires_reindex: bool
+    message: str

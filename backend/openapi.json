@@ -764,6 +764,197 @@
         "title": "SettingsResponse",
         "type": "object"
       },
+      "SettingsUpdateRequest": {
+        "description": "Partial settings update. Any field left unset is unchanged.",
+        "properties": {
+          "chunk_overlap": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Chunk Overlap"
+          },
+          "chunk_size": {
+            "anyOf": [
+              {
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Chunk Size"
+          },
+          "context_window": {
+            "anyOf": [
+              {
+                "minimum": 256.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Context Window"
+          },
+          "embedding_model": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Embedding Model"
+          },
+          "generation_concurrency": {
+            "anyOf": [
+              {
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Generation Concurrency"
+          },
+          "generation_model": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Generation Model"
+          },
+          "indexing_concurrency": {
+            "anyOf": [
+              {
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Indexing Concurrency"
+          },
+          "max_output_tokens": {
+            "anyOf": [
+              {
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Output Tokens"
+          },
+          "max_upload_size_mb": {
+            "anyOf": [
+              {
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Upload Size Mb"
+          },
+          "rag_max_context_chars": {
+            "anyOf": [
+              {
+                "minimum": 500.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rag Max Context Chars"
+          },
+          "rag_max_context_chunks": {
+            "anyOf": [
+              {
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rag Max Context Chunks"
+          },
+          "search_top_k": {
+            "anyOf": [
+              {
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Search Top K"
+          },
+          "temperature": {
+            "anyOf": [
+              {
+                "maximum": 2.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Temperature"
+          }
+        },
+        "title": "SettingsUpdateRequest",
+        "type": "object"
+      },
+      "SettingsUpdateResponse": {
+        "properties": {
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "requires_reindex": {
+            "title": "Requires Reindex",
+            "type": "boolean"
+          },
+          "requires_restart": {
+            "title": "Requires Restart",
+            "type": "boolean"
+          },
+          "settings": {
+            "$ref": "#/components/schemas/SettingsResponse"
+          }
+        },
+        "required": [
+          "settings",
+          "requires_restart",
+          "requires_reindex",
+          "message"
+        ],
+        "title": "SettingsUpdateResponse",
+        "type": "object"
+      },
       "UploadResponse": {
         "properties": {
           "document": {
@@ -1547,6 +1738,45 @@
           }
         },
         "summary": "Get Settings",
+        "tags": [
+          "settings"
+        ]
+      },
+      "patch": {
+        "operationId": "update_settings_api_v1_settings_patch",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SettingsUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsUpdateResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update Settings",
         "tags": [
           "settings"
         ]

@@ -64,3 +64,7 @@ class InvalidSearchQueryError(ApplicationError):
 
 class GenerationError(ApplicationError):
     """Raised when the LLM cannot generate a response (e.g. Ollama unavailable)."""
+
+
+class InvalidSettingsError(ApplicationError):
+    """Raised when a settings update would produce an invalid configuration."""

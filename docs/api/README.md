@@ -34,6 +34,7 @@ drifts from the code.
 | GET | `/models` · `/models/status` | Configured models and availability |
 | GET | `/dashboard/stats` | Document/chunk/job counts |
 | GET | `/settings` | Effective configuration (no filesystem paths) |
+| PATCH | `/settings` | Update settings overrides (persisted; applied on restart) |
 
 Errors use consistent HTTP codes: `400` invalid input, `404` not found, `413` too
 large, `415` unsupported type, `422` schema validation.

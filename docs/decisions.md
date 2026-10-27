@@ -15,3 +15,4 @@ don't warrant a full ADR; significant ones link to an ADR in `docs/adr/`.
 - 2026-10-27 — Commit the OpenAPI spec at backend/openapi.json (Insomnia/Postman importable) and enforce freshness with a contract test; regenerate via scripts/export_openapi.py after any endpoint change (ADR-0007).
 - 2026-10-27 — Enforce Clean Architecture boundaries with an automated test; moved safe-filename policy from infrastructure to application/services/naming so use cases never import infrastructure.
 - 2026-10-27 — Verify the Ollama embedding/generation adapters against a running Ollama via opt-in tests that skip when it is unavailable, keeping the default suite offline and deterministic.
+- 2026-10-27 — Settings are mutable via PATCH /settings as validated overrides persisted to config_dir/overrides.json and applied on restart (not live), with a reindex warning on embedding-model change (ADR-0008).

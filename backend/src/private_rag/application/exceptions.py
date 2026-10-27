@@ -60,3 +60,7 @@ class UnsupportedParserError(ApplicationError):
 
 class InvalidSearchQueryError(ApplicationError):
     """Raised when a search query is empty or otherwise invalid."""
+
+
+class GenerationError(ApplicationError):
+    """Raised when the LLM cannot generate a response (e.g. Ollama unavailable)."""

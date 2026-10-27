@@ -10,3 +10,4 @@ don't warrant a full ADR; significant ones link to an ADR in `docs/adr/`.
 - 2026-10-27 — Background indexing runs as an in-process asyncio worker — no Redis/Celery; satisfies §13 with restart recovery and persisted jobs (ADR-0003).
 - 2026-10-27 — Commit once per completed build phase on its `feat/phase-N-*` branch — keeps phase history reviewable; push/merge on request.
 - 2026-10-27 — Adopt the AI-Dash governance layer (management-docs scope only) — fills the project-management gap without changing the app or agent runtime (ADR-0005).
+- 2026-10-27 — RAG chat answers only from retrieved context, cites only real sources, and skips the LLM when retrieval is empty — grounded, injection-safe answering that keeps search and generation independent (ADR-0006).

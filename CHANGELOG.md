@@ -12,6 +12,7 @@ All notable changes to this project are documented here. The format follows
 - **Phase 3 — Document upload:** validation (type/size/signature/UTF-8), SHA-256 duplicate detection, and upload/list/get/download/delete endpoints.
 - **Phase 4 — Ingestion:** PDF/DOCX/TXT/MD parsers, chunking with overlap and page numbers, Ollama embedding adapter, all-or-nothing index use case, and an in-process background indexing worker with job tracking, retry, and restart recovery; content/reindex/indexing-jobs endpoints.
 - **Phase 5 — Semantic search:** LLM-free `POST /api/v1/search/semantic`, scoped to indexed documents.
+- **Phase 6 — RAG chat:** grounded `POST /api/v1/chat` and streaming `POST /api/v1/chat/stream` (retrieval → bounded context → prompt → local Ollama generation), with real (non-fabricated) source citations, a `grounded` flag, prompt-injection-safe grounding, and `GET /api/v1/models` + `/models/status`.
 - **Governance:** adopted the AI-Dash management layer (ADRs under `docs/adr/`, `docs/decisions.md`, `docs/tasks.md`, `docs/repo-map.md`, `AGENT_TEAM.md`, guides) — see ADR-0005.
 
 ### Notes

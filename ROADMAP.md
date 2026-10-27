@@ -19,14 +19,14 @@ Architecture and Test-Driven Development. Each phase is developed on its own
 | 3 | Document upload (validation, checksum, dedupe, CRUD) | ✅ | `31e18cc` |
 | 4 | Ingestion (parsers, chunking, embeddings, background worker) | ✅ | `1621969` |
 | 5 | Semantic search (LLM-free retrieval endpoint) | ✅ | `d1ad137` |
-| 6 | RAG engine (retrieval, prompt, Ollama generation, streaming, citations) | ⬜ | |
+| 6 | RAG engine (retrieval, prompt, Ollama generation, streaming, citations) | ✅ | chat + stream + models endpoints |
 | 7 | Frontend (dashboard, documents, search, chat, settings) | ⬜ | Shell + health dashboard exist from Phase 1 |
 | 8 | Testing & quality (coverage, architecture boundaries, offline) | ⬜ | Ongoing per phase |
 | 9 | Documentation & delivery (README, ADRs, final report) | 🚧 | ADRs 0001–0004 written |
 
 ## Test status
 
-Backend: **147 tests passing**; ruff and mypy clean. Frontend: typecheck + lint
+Backend: **167 tests passing**; ruff and mypy clean. Frontend: typecheck + lint
 clean, component tests passing, production build working.
 
 ## Verified vs. unverified
@@ -58,3 +58,4 @@ was deliberately **not** adopted yet and can be in a follow-up ADR.
 - [0003 — Ingestion pipeline & background indexing](docs/adr/0003-ingestion-pipeline-and-background-indexing.md)
 - [0004 — Semantic search](docs/adr/0004-semantic-search.md)
 - [0005 — Adopt the AI-Dash governance layer](docs/adr/0005-adopt-ai-dash-governance-layer.md)
+- [0006 — RAG chat engine](docs/adr/0006-rag-chat-engine.md)

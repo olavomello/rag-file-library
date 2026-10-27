@@ -13,9 +13,15 @@ from pathlib import Path
 
 from private_rag.application.ports.clock import Clock
 from private_rag.application.ports.embeddings import EmbeddingProvider
+from private_rag.application.ports.generation import GenerationProvider
 from private_rag.application.ports.health import HealthProbe
 from private_rag.application.services.chunking import Chunker
+from private_rag.application.services.context_builder import ContextBuilder
+from private_rag.application.services.prompt_builder import PromptBuilder
 from private_rag.application.services.token_counter import WhitespaceTokenCounter
+from private_rag.application.use_cases.chat.answer_question import (
+    AnswerQuestionUseCase,
+)
 from private_rag.application.use_cases.documents.delete_document import (
     DeleteDocumentUseCase,
 )
@@ -51,7 +57,11 @@ from private_rag.infrastructure.filesystem.json_indexing_job_repository import (
 )
 from private_rag.infrastructure.indexing.worker import IndexingWorker
 from private_rag.infrastructure.ollama.embedding_provider import OllamaEmbeddingProvider
+from private_rag.infrastructure.ollama.generation_provider import (
+    OllamaGenerationProvider,
+)
 from private_rag.infrastructure.ollama.health_probe import OllamaHealthProbe
+from private_rag.infrastructure.ollama.model_catalog import OllamaModelCatalog
 from private_rag.infrastructure.parsers.registry import ParserRegistry
 from private_rag.settings import Settings
 
@@ -183,6 +193,47 @@ class Container:
             chunks=self.chunk_repository,
             documents=self.document_repository,
             default_top_k=self._settings.search_top_k,
+        )
+
+    # --- RAG chat ---
+
+    @cached_property
+    def generation_provider(self) -> GenerationProvider:
+        return OllamaGenerationProvider(
+            base_url=self._settings.ollama_base_url,
+            model=self._settings.ollama_generation_model,
+            temperature=self._settings.ollama_temperature,
+            max_output_tokens=self._settings.ollama_max_output_tokens,
+            context_window=self._settings.ollama_context_window,
+            timeout_seconds=self._settings.ollama_request_timeout_seconds,
+        )
+
+    @cached_property
+    def context_builder(self) -> ContextBuilder:
+        return ContextBuilder(
+            max_chunks=self._settings.rag_max_context_chunks,
+            max_chars=self._settings.rag_max_context_chars,
+        )
+
+    @cached_property
+    def prompt_builder(self) -> PromptBuilder:
+        return PromptBuilder()
+
+    @cached_property
+    def answer_question_use_case(self) -> AnswerQuestionUseCase:
+        return AnswerQuestionUseCase(
+            search=self.semantic_search_use_case,
+            context_builder=self.context_builder,
+            prompt_builder=self.prompt_builder,
+            generation=self.generation_provider,
+            default_top_k=self._settings.search_top_k,
+        )
+
+    @cached_property
+    def model_catalog(self) -> OllamaModelCatalog:
+        return OllamaModelCatalog(
+            base_url=self._settings.ollama_base_url,
+            timeout_seconds=min(self._settings.ollama_request_timeout_seconds, 5.0),
         )
 
     # --- Health probes ---

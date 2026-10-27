@@ -60,6 +60,10 @@ class Settings(BaseSettings):
     # --- Search ---
     search_top_k: int = Field(default=5, ge=1)
 
+    # --- RAG context limits ---
+    rag_max_context_chunks: int = Field(default=5, ge=1)
+    rag_max_context_chars: int = Field(default=6000, ge=500)
+
     # --- Concurrency ---
     indexing_concurrency: int = Field(default=1, ge=1)
     generation_concurrency: int = Field(default=1, ge=1)

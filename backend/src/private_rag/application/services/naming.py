@@ -1,4 +1,8 @@
-"""Safe internal filename generation and validation."""
+"""Safe internal filename generation and validation (pure policy).
+
+Lives in the application layer so use cases and infrastructure both depend on it
+inward; it performs no I/O.
+"""
 
 from __future__ import annotations
 

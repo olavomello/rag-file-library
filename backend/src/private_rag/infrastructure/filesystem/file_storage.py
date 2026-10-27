@@ -4,11 +4,11 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from private_rag.infrastructure.filesystem.atomic import atomic_write_bytes
-from private_rag.infrastructure.filesystem.naming import (
+from private_rag.application.services.naming import (
     UnsafeStoredNameError,
     validate_stored_name,
 )
+from private_rag.infrastructure.filesystem.atomic import atomic_write_bytes
 
 
 class FileStorage:

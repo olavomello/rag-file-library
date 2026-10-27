@@ -114,9 +114,14 @@ def test_empty_question_rejected(client: TestClient) -> None:
     assert client.post(CHAT, json={"question": ""}).status_code == 422
 
 
-def test_models_endpoint_reports_unavailable_without_ollama(client: TestClient) -> None:
+def test_models_endpoint_reports_consistent_status(client: TestClient) -> None:
     body = client.get("/api/v1/models").json()
-    assert body["generation_model"]
-    assert body["ollama_available"] is False
-    assert body["generation_available"] is False
-    assert body["available_models"] == []
+    assert body["generation_model"] == "qwen3:0.6b"
+    assert body["embedding_model"] == "embeddinggemma"
+    assert isinstance(body["ollama_available"], bool)
+    # Availability flags must be consistent with reachability regardless of
+    # whether Ollama happens to be running in this environment.
+    if not body["ollama_available"]:
+        assert body["generation_available"] is False
+        assert body["embedding_available"] is False
+        assert body["available_models"] == []

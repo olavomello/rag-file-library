@@ -8,10 +8,10 @@ from private_rag.application.dto.document import UploadResult
 from private_rag.application.ports.clock import Clock
 from private_rag.application.ports.file_store import FileStore
 from private_rag.application.services.file_validation import validate_upload
+from private_rag.application.services.naming import build_stored_name
 from private_rag.domain.entities.document import Document
 from private_rag.domain.repositories.document_repository import DocumentRepository
 from private_rag.domain.services.hashing import sha256_hex
-from private_rag.infrastructure.filesystem.naming import build_stored_name
 
 
 class UploadDocumentUseCase:

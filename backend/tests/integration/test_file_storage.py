@@ -6,11 +6,11 @@ from pathlib import Path
 
 import pytest
 
-from private_rag.infrastructure.filesystem.file_storage import FileStorage
-from private_rag.infrastructure.filesystem.naming import (
+from private_rag.application.services.naming import (
     UnsafeStoredNameError,
     build_stored_name,
 )
+from private_rag.infrastructure.filesystem.file_storage import FileStorage
 
 
 @pytest.fixture

@@ -109,6 +109,12 @@ rag-file-library/
 
 ## Status
 
-Under active, phased implementation. See [docs/adr](docs/adr/) for
-architecture decision records and the implementation report (added on completion) for
-the verified vs. unverified feature matrix.
+All nine build phases are complete. Backend: **195 tests passing** (domain 98% /
+application 97% / 96% total coverage), ruff + mypy clean. Frontend: typecheck + lint
+clean, Vitest passing, production build working. Real embeddings and generation are
+verified against a running Ollama (`embeddinggemma`, `qwen3:0.6b`).
+
+See the [implementation report](docs/IMPLEMENTATION_REPORT.md) for the full
+feature and verified/unverified matrix, [docs/architecture](docs/architecture/overview.md)
+for the design, [docs/api](docs/api/README.md) for the API, and [docs/adr](docs/adr/)
+for decision records.

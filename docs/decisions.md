@@ -13,3 +13,5 @@ don't warrant a full ADR; significant ones link to an ADR in `docs/adr/`.
 - 2026-10-27 — RAG chat answers only from retrieved context, cites only real sources, and skips the LLM when retrieval is empty — grounded, injection-safe answering that keeps search and generation independent (ADR-0006).
 - 2026-10-27 — Frontend is feature-based with a typed service layer; chat streams over NDJSON; Settings is read-only for now (ADR-0007).
 - 2026-10-27 — Commit the OpenAPI spec at backend/openapi.json (Insomnia/Postman importable) and enforce freshness with a contract test; regenerate via scripts/export_openapi.py after any endpoint change (ADR-0007).
+- 2026-10-27 — Enforce Clean Architecture boundaries with an automated test; moved safe-filename policy from infrastructure to application/services/naming so use cases never import infrastructure.
+- 2026-10-27 — Verify the Ollama embedding/generation adapters against a running Ollama via opt-in tests that skip when it is unavailable, keeping the default suite offline and deterministic.

@@ -21,15 +21,19 @@ Architecture and Test-Driven Development. Each phase is developed on its own
 | 5 | Semantic search (LLM-free retrieval endpoint) | ✅ | `d1ad137` |
 | 6 | RAG engine (retrieval, prompt, Ollama generation, streaming, citations) | ✅ | chat + stream + models endpoints |
 | 7 | Frontend (dashboard, documents, search, chat, settings) | ✅ | all pages wired to the API; chat streaming; `backend/openapi.json` added |
-| 8 | Testing & quality (coverage, architecture boundaries, offline) | ⬜ | Ongoing per phase |
-| 9 | Documentation & delivery (README, ADRs, final report) | 🚧 | ADRs 0001–0004 written |
+| 8 | Testing & quality (coverage, architecture boundaries, offline) | ✅ | arch-boundary + restart e2e tests; coverage domain 98% / app 97% |
+| 9 | Documentation & delivery (README, ADRs, final report) | ✅ | architecture/api/deployment docs + IMPLEMENTATION_REPORT.md |
 
 ## Test status
 
-Backend: **170 tests passing**; ruff and mypy clean. Frontend: typecheck + lint
-clean, 6 Vitest tests passing, production build working. The full API is committed
-as `backend/openapi.json` (Insomnia/Postman importable) and kept current by a
-contract test.
+Backend: **195 tests passing** (coverage: domain 98%, application 97%, 96% total);
+ruff and mypy clean. Frontend: typecheck + lint clean, 6 Vitest tests passing,
+production build working. The full API is committed as `backend/openapi.json`
+(Insomnia/Postman importable) and kept current by a contract test. Real embeddings
+and generation are verified against a running Ollama via opt-in live tests.
+
+All nine phases are complete — see the
+[implementation report](docs/IMPLEMENTATION_REPORT.md).
 
 ## Verified vs. unverified
 

@@ -34,7 +34,13 @@ def create_app(
     @asynccontextmanager
     async def lifespan(_: FastAPI) -> AsyncIterator[None]:
         resolved_container.prepare_storage()
-        yield
+        worker = resolved_container.indexing_worker
+        await worker.start()
+        await worker.recover()
+        try:
+            yield
+        finally:
+            await worker.stop()
 
     app = FastAPI(
         title=settings.app_name,

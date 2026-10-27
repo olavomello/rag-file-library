@@ -11,10 +11,12 @@ from private_rag.container.container import Container
 from private_rag.domain.value_objects.document_status import DocumentStatus
 from private_rag.presentation.api.dependencies.providers import get_container
 from private_rag.presentation.api.schemas.documents import (
+    DocumentContentResponse,
     DocumentListResponse,
     DocumentResponse,
     UploadResponse,
 )
+from private_rag.presentation.api.schemas.indexing import JobResponse
 
 router = APIRouter(prefix="/documents", tags=["documents"])
 
@@ -29,6 +31,9 @@ async def upload_document(
     result = await asyncio.to_thread(
         use_case.execute, filename=file.filename or "upload", data=data
     )
+    # Newly stored documents are queued for background indexing.
+    if not result.is_duplicate:
+        await container.indexing_worker.enqueue(result.document.id)
     return UploadResponse(
         document=DocumentResponse.from_entity(result.document),
         is_duplicate=result.is_duplicate,
@@ -66,6 +71,34 @@ async def get_document(
         container.get_document_use_case.execute, document_id
     )
     return DocumentResponse.from_entity(document)
+
+
+@router.get("/{document_id}/content", response_model=DocumentContentResponse)
+async def get_document_content(
+    document_id: str,
+    container: Container = Depends(get_container),
+) -> DocumentContentResponse:
+    content = await asyncio.to_thread(
+        container.get_document_content_use_case.execute, document_id
+    )
+    return DocumentContentResponse(
+        document_id=document_id, content=content, char_count=len(content)
+    )
+
+
+@router.post(
+    "/{document_id}/reindex",
+    response_model=JobResponse,
+    status_code=status.HTTP_202_ACCEPTED,
+)
+async def reindex_document(
+    document_id: str,
+    container: Container = Depends(get_container),
+) -> JobResponse:
+    # Confirm the document exists (404 otherwise), then queue it for indexing.
+    await asyncio.to_thread(container.get_document_use_case.execute, document_id)
+    job = await container.indexing_worker.enqueue(document_id)
+    return JobResponse.from_entity(job)
 
 
 @router.get("/{document_id}/download")

@@ -52,3 +52,9 @@ class DocumentListResponse(BaseModel):
 class UploadResponse(BaseModel):
     document: DocumentResponse
     is_duplicate: bool
+
+
+class DocumentContentResponse(BaseModel):
+    document_id: str
+    content: str
+    char_count: int

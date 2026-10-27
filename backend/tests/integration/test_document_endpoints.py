@@ -2,16 +2,30 @@
 
 from __future__ import annotations
 
+import time
 from collections.abc import Iterator
 from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
 
+from private_rag.container.container import Container
 from private_rag.main import create_app
 from private_rag.settings import Settings
 
 BASE = "/api/v1/documents"
+
+
+class _FakeEmbeddings:
+    """Deterministic embeddings so background indexing succeeds without Ollama."""
+
+    model = "fake-embed"
+
+    def embed_documents(self, texts: list[str]) -> list[list[float]]:
+        return [[float(len(t) % 5), 1.0, 0.0, 0.5] for t in texts]
+
+    def embed_query(self, text: str) -> list[float]:
+        return [float(len(text) % 5), 1.0, 0.0, 0.5]
 
 
 @pytest.fixture
@@ -24,8 +38,22 @@ def client(tmp_path: Path) -> Iterator[TestClient]:
         temp_dir=str(tmp_path / "temp"),
         config_dir=str(tmp_path / "config"),
     )
-    with TestClient(create_app(settings=settings)) as test_client:
+    container = Container(settings)
+    container.__dict__["embedding_provider"] = _FakeEmbeddings()
+    with TestClient(create_app(settings=settings, container=container)) as test_client:
         yield test_client
+
+
+def _wait_for_status(
+    client: TestClient, document_id: str, targets: set[str], timeout: float = 15.0
+) -> str:
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        status = client.get(f"{BASE}/{document_id}").json()["status"]
+        if status in targets:
+            return status
+        time.sleep(0.05)
+    raise AssertionError(f"Document {document_id} did not reach {targets}")
 
 
 def _upload(client: TestClient, name: str, data: bytes, content_type: str = "text/plain"):
@@ -96,9 +124,12 @@ def test_get_missing_returns_404(client: TestClient) -> None:
 
 
 def test_list_filters_by_status(client: TestClient) -> None:
-    _upload(client, "a.txt", b"content a")
-    # All freshly uploaded documents are in 'uploaded' status.
-    assert client.get(f"{BASE}?status=uploaded").json()["total"] == 1
-    assert client.get(f"{BASE}?status=indexed").json()["total"] == 0
+    response = _upload(client, "a.txt", b"content a")
+    document_id = response.json()["document"]["id"]
+    # The document is queued and indexed in the background (fake embeddings).
+    _wait_for_status(client, document_id, {"indexed"})
+
+    assert client.get(f"{BASE}?status=indexed").json()["total"] == 1
+    assert client.get(f"{BASE}?status=uploaded").json()["total"] == 0
     # Invalid status value is rejected by validation.
     assert client.get(f"{BASE}?status=bogus").status_code == 422

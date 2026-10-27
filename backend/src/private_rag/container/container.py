@@ -12,16 +12,25 @@ from functools import cached_property
 from pathlib import Path
 
 from private_rag.application.ports.clock import Clock
+from private_rag.application.ports.embeddings import EmbeddingProvider
 from private_rag.application.ports.health import HealthProbe
+from private_rag.application.services.chunking import Chunker
+from private_rag.application.services.token_counter import WhitespaceTokenCounter
 from private_rag.application.use_cases.documents.delete_document import (
     DeleteDocumentUseCase,
 )
 from private_rag.application.use_cases.documents.get_document import GetDocumentUseCase
+from private_rag.application.use_cases.documents.get_document_content import (
+    GetDocumentContentUseCase,
+)
 from private_rag.application.use_cases.documents.list_documents import (
     ListDocumentsUseCase,
 )
 from private_rag.application.use_cases.documents.upload_document import (
     UploadDocumentUseCase,
+)
+from private_rag.application.use_cases.indexing.index_document import (
+    IndexDocumentUseCase,
 )
 from private_rag.domain.repositories.chunk_repository import ChunkVectorRepository
 from private_rag.domain.repositories.document_repository import DocumentRepository
@@ -37,7 +46,10 @@ from private_rag.infrastructure.filesystem.file_storage import FileStorage
 from private_rag.infrastructure.filesystem.json_indexing_job_repository import (
     JsonIndexingJobRepository,
 )
+from private_rag.infrastructure.indexing.worker import IndexingWorker
+from private_rag.infrastructure.ollama.embedding_provider import OllamaEmbeddingProvider
 from private_rag.infrastructure.ollama.health_probe import OllamaHealthProbe
+from private_rag.infrastructure.parsers.registry import ParserRegistry
 from private_rag.settings import Settings
 
 
@@ -105,6 +117,58 @@ class Container:
             chunks=self.chunk_repository,
             jobs=self.indexing_job_repository,
             storage=self.file_storage,
+        )
+
+    @cached_property
+    def get_document_content_use_case(self) -> GetDocumentContentUseCase:
+        return GetDocumentContentUseCase(
+            documents=self.document_repository,
+            storage=self.file_storage,
+            parser=self.parser_registry,
+        )
+
+    # --- Ingestion pipeline ---
+
+    @cached_property
+    def parser_registry(self) -> ParserRegistry:
+        return ParserRegistry()
+
+    @cached_property
+    def chunker(self) -> Chunker:
+        return Chunker(
+            chunk_size=self._settings.chunk_size,
+            chunk_overlap=self._settings.chunk_overlap,
+            token_counter=WhitespaceTokenCounter(),
+        )
+
+    @cached_property
+    def embedding_provider(self) -> EmbeddingProvider:
+        return OllamaEmbeddingProvider(
+            base_url=self._settings.ollama_base_url,
+            model=self._settings.ollama_embedding_model,
+            timeout_seconds=self._settings.ollama_request_timeout_seconds,
+        )
+
+    @cached_property
+    def index_document_use_case(self) -> IndexDocumentUseCase:
+        return IndexDocumentUseCase(
+            documents=self.document_repository,
+            chunks=self.chunk_repository,
+            storage=self.file_storage,
+            parser=self.parser_registry,
+            chunker=self.chunker,
+            embeddings=self.embedding_provider,
+            clock=self.clock,
+        )
+
+    @cached_property
+    def indexing_worker(self) -> IndexingWorker:
+        return IndexingWorker(
+            index_use_case=self.index_document_use_case,
+            documents=self.document_repository,
+            jobs=self.indexing_job_repository,
+            clock=self.clock,
+            concurrency=self._settings.indexing_concurrency,
         )
 
     # --- Health probes ---

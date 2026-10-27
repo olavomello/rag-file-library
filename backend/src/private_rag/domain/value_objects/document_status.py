@@ -31,7 +31,12 @@ _VALID_TRANSITIONS: dict[DocumentStatus, frozenset[DocumentStatus]] = {
         {DocumentStatus.PROCESSING, DocumentStatus.FAILED, DocumentStatus.DELETING}
     ),
     DocumentStatus.PROCESSING: frozenset(
-        {DocumentStatus.INDEXED, DocumentStatus.FAILED, DocumentStatus.DELETING}
+        {
+            DocumentStatus.INDEXED,
+            DocumentStatus.FAILED,
+            DocumentStatus.DELETING,
+            DocumentStatus.PENDING,  # re-queued after an interrupted run (recovery)
+        }
     ),
     DocumentStatus.INDEXED: frozenset(
         {DocumentStatus.PENDING, DocumentStatus.DELETING}

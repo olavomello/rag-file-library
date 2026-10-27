@@ -67,11 +67,15 @@ class IndexingJob:
         self.completed_at = now
         self.error_message = error_message
 
-    def register_retry(self) -> None:
-        """Reset the job to a fresh pending state and count the retry."""
-        self.retry_count += 1
+    def reset_for_requeue(self) -> None:
+        """Return the job to a clean pending state (retry count unchanged)."""
         self.status = JobStatus.PENDING
         self.progress = 0.0
         self.started_at = None
         self.completed_at = None
         self.error_message = None
+
+    def register_retry(self) -> None:
+        """Count a retry and reset the job to a fresh pending state."""
+        self.retry_count += 1
+        self.reset_for_requeue()

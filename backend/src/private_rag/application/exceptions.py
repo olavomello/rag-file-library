@@ -36,3 +36,23 @@ class EmptyDocumentError(ApplicationError):
 
 class InvalidFileContentError(ApplicationError):
     """Raised when a file's content does not match its declared/expected type."""
+
+
+class DocumentExtractionError(ApplicationError):
+    """Raised when a document cannot be parsed (e.g. corrupted file)."""
+
+
+class NoExtractableTextError(ApplicationError):
+    """Raised when a document yields no usable text (e.g. a scanned PDF)."""
+
+
+class EmbeddingError(ApplicationError):
+    """Raised when embeddings cannot be generated (e.g. Ollama unavailable)."""
+
+
+class UnsupportedParserError(ApplicationError):
+    """Raised when no parser is registered for a file extension."""
+
+    def __init__(self, extension: str) -> None:
+        self.extension = extension
+        super().__init__(f"No parser registered for extension: {extension!r}")

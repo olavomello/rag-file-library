@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-10-27
+
 ### Added
 - **Phase 1 — Foundation:** monorepo, FastAPI backend (Clean Architecture), React/Vite/Tailwind frontend, validated settings, health endpoints, CI, and Windows scripts.
 - **Phase 2 — Domain & storage:** domain entities and lifecycle, repository ports, embedded ChromaDB chunk + document-registry repositories, path-safe filesystem storage, and atomic JSON indexing-job store.
@@ -20,6 +22,8 @@ All notable changes to this project are documented here. The format follows
 
 - **Phase 8 — Testing & quality:** architecture-boundary test enforcing Clean Architecture, an end-to-end restart/persistence test, opt-in live-Ollama verification tests, and a `conftest.py` that keeps the ChromaDB-heavy suite deterministic. Coverage: domain 98%, application 97%, 96% total.
 - **Phase 9 — Documentation & delivery:** architecture overview, API reference, Windows deployment guide, and the final implementation report; README/ROADMAP updated to "complete".
+- **Frontend UX:** responsive layout with a collapsible mobile sidebar; light/dark/system theme toggle in Settings (persisted); an editable Settings form wired to `PATCH /settings` with restart/reindex indicators; and persistent AI chat — conversations are stored and listed, and streaming continues across navigation.
+- **Agent & CI hardening:** an `agent-test` post-push verification agent and a `pre-push` gate; CI aligned to Node 24 / npm 11 with deprecation-free actions.
 
 ### Notes
 - Real Ollama embedding (`embeddinggemma`) and generation (`qwen3:0.6b`) are verified by opt-in live tests that skip when Ollama is unavailable; the default suite remains offline/CI-safe with mocks and fakes.

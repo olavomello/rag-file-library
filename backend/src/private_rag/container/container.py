@@ -32,6 +32,9 @@ from private_rag.application.use_cases.documents.upload_document import (
 from private_rag.application.use_cases.indexing.index_document import (
     IndexDocumentUseCase,
 )
+from private_rag.application.use_cases.search.semantic_search import (
+    SemanticSearchUseCase,
+)
 from private_rag.domain.repositories.chunk_repository import ChunkVectorRepository
 from private_rag.domain.repositories.document_repository import DocumentRepository
 from private_rag.domain.repositories.indexing_job_repository import (
@@ -169,6 +172,17 @@ class Container:
             jobs=self.indexing_job_repository,
             clock=self.clock,
             concurrency=self._settings.indexing_concurrency,
+        )
+
+    # --- Search ---
+
+    @cached_property
+    def semantic_search_use_case(self) -> SemanticSearchUseCase:
+        return SemanticSearchUseCase(
+            embeddings=self.embedding_provider,
+            chunks=self.chunk_repository,
+            documents=self.document_repository,
+            default_top_k=self._settings.search_top_k,
         )
 
     # --- Health probes ---

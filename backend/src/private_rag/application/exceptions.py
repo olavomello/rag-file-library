@@ -56,3 +56,7 @@ class UnsupportedParserError(ApplicationError):
     def __init__(self, extension: str) -> None:
         self.extension = extension
         super().__init__(f"No parser registered for extension: {extension!r}")
+
+
+class InvalidSearchQueryError(ApplicationError):
+    """Raised when a search query is empty or otherwise invalid."""

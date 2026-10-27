@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -23,7 +26,12 @@ def create_app(
         container: Optional pre-built container, primarily for testing with fakes.
     """
     settings = settings or Settings()
-    container = container or Container(settings)
+    resolved_container = container or Container(settings)
+
+    @asynccontextmanager
+    async def lifespan(_: FastAPI) -> AsyncIterator[None]:
+        resolved_container.prepare_storage()
+        yield
 
     app = FastAPI(
         title=settings.app_name,
@@ -31,8 +39,9 @@ def create_app(
         description="Local, private Retrieval-Augmented Generation over your documents.",
         docs_url="/docs",
         openapi_url="/openapi.json",
+        lifespan=lifespan,
     )
-    app.state.container = container
+    app.state.container = resolved_container
     app.state.settings = settings
 
     app.add_middleware(

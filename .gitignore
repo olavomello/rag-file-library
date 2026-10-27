@@ -37,3 +37,6 @@ data/jobs/*
 data/temp/*
 data/config/*
 !data/**/.gitkeep
+
+# Runtime data created when the backend runs from the backend/ directory.
+backend/data/

@@ -5,6 +5,8 @@ import { BrowserRouter } from 'react-router-dom';
 
 import App from './app/App';
 import { queryClient } from './app/queryClient';
+import { ThemeProvider } from './app/theme';
+import { ChatProvider } from './app/chatStore';
 import './styles/index.css';
 
 const rootElement = document.getElementById('root');
@@ -14,10 +16,14 @@ if (!rootElement) {
 
 ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-    </QueryClientProvider>
+    <ThemeProvider>
+      <QueryClientProvider client={queryClient}>
+        <ChatProvider>
+          <BrowserRouter>
+            <App />
+          </BrowserRouter>
+        </ChatProvider>
+      </QueryClientProvider>
+    </ThemeProvider>
   </React.StrictMode>
 );

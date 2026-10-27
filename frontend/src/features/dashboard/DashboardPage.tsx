@@ -28,8 +28,10 @@ export function DashboardPage(): JSX.Element {
   return (
     <div>
       <header className="mb-6">
-        <h2 className="text-2xl font-semibold text-slate-900">Dashboard</h2>
-        <p className="text-sm text-slate-500">Knowledge base overview and infrastructure status.</p>
+        <h2 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">Dashboard</h2>
+        <p className="text-sm text-slate-500 dark:text-slate-400">
+          Knowledge base overview and infrastructure status.
+        </p>
       </header>
 
       <section className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
@@ -42,14 +44,12 @@ export function DashboardPage(): JSX.Element {
       </section>
 
       <section className="grid gap-4 md:grid-cols-2">
-        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h3 className="mb-3 text-sm font-semibold text-slate-700">Infrastructure</h3>
+        <Card title="Infrastructure">
           <Row label="Embedded ChromaDB" status={toStatus(chroma)} detail={chroma.data?.detail} />
           <Row label="Ollama" status={toStatus(ollama)} detail={ollama.data?.detail} />
-        </div>
+        </Card>
 
-        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h3 className="mb-3 text-sm font-semibold text-slate-700">Models</h3>
+        <Card title="Models">
           <Row
             label={`Generation · ${s?.generation_model ?? models.data?.generation_model ?? '—'}`}
             status={models.isLoading ? 'loading' : models.data?.generation_available ? 'ok' : 'unavailable'}
@@ -59,14 +59,23 @@ export function DashboardPage(): JSX.Element {
             status={models.isLoading ? 'loading' : models.data?.embedding_available ? 'ok' : 'unavailable'}
           />
           {models.data && !models.data.ollama_available && (
-            <p className="mt-3 text-xs text-slate-400">
-              Ollama is not reachable. Install it and run{' '}
-              <code className="rounded bg-slate-100 px-1">ollama pull {models.data.generation_model}</code>{' '}
-              and <code className="rounded bg-slate-100 px-1">ollama pull {models.data.embedding_model}</code>.
+            <p className="mt-3 text-xs text-slate-400 dark:text-slate-500">
+              Ollama is not reachable. Install it and pull{' '}
+              <code className="rounded bg-slate-100 px-1 dark:bg-slate-800">{models.data.generation_model}</code>{' '}
+              and <code className="rounded bg-slate-100 px-1 dark:bg-slate-800">{models.data.embedding_model}</code>.
             </p>
           )}
-        </div>
+        </Card>
       </section>
+    </div>
+  );
+}
+
+function Card({ title, children }: { title: string; children: React.ReactNode }): JSX.Element {
+  return (
+    <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <h3 className="mb-3 text-sm font-semibold text-slate-700 dark:text-slate-200">{title}</h3>
+      {children}
     </div>
   );
 }
@@ -81,10 +90,10 @@ function Row({
   detail?: string | null;
 }): JSX.Element {
   return (
-    <div className="flex items-center justify-between border-b border-slate-100 py-2.5 last:border-0">
+    <div className="flex items-center justify-between border-b border-slate-100 py-2.5 last:border-0 dark:border-slate-800">
       <div>
-        <p className="text-sm font-medium text-slate-800">{label}</p>
-        {detail && <p className="text-xs text-slate-400">{detail}</p>}
+        <p className="text-sm font-medium text-slate-800 dark:text-slate-200">{label}</p>
+        {detail && <p className="text-xs text-slate-400 dark:text-slate-500">{detail}</p>}
       </div>
       <StatusBadge status={status} />
     </div>

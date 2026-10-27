@@ -131,6 +131,32 @@ export interface SettingsView {
   generation_concurrency: number;
 }
 
+export type SettingsUpdate = Partial<
+  Pick<
+    SettingsView,
+    | 'generation_model'
+    | 'embedding_model'
+    | 'temperature'
+    | 'max_output_tokens'
+    | 'context_window'
+    | 'chunk_size'
+    | 'chunk_overlap'
+    | 'search_top_k'
+    | 'rag_max_context_chunks'
+    | 'rag_max_context_chars'
+    | 'max_upload_size_mb'
+    | 'indexing_concurrency'
+    | 'generation_concurrency'
+  >
+>;
+
+export interface SettingsUpdateResponse {
+  settings: SettingsView;
+  requires_restart: boolean;
+  requires_reindex: boolean;
+  message: string;
+}
+
 export interface ModelsStatus {
   generation_model: string;
   embedding_model: string;

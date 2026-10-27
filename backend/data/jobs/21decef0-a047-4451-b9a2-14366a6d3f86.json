@@ -1,0 +1,10 @@
+{
+  "id": "21decef0-a047-4451-b9a2-14366a6d3f86",
+  "document_id": "97232d4f-3df9-4ed0-b10d-54305a84b01a",
+  "status": "failed",
+  "progress": 0.05,
+  "started_at": "2026-10-27T19:34:22.247807+00:00",
+  "completed_at": "2026-10-27T19:34:22.492377+00:00",
+  "error_message": "PDF has no extractable text (it may be scanned; OCR is not supported)",
+  "retry_count": 0
+}

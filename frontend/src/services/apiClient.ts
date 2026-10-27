@@ -43,6 +43,16 @@ export async function apiPost<T>(path: string, body: unknown, signal?: AbortSign
   return (await response.json()) as T;
 }
 
+export async function apiPatch<T>(path: string, body: unknown): Promise<T> {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    method: 'PATCH',
+    headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (!response.ok) throw await parseError(response, `PATCH ${path}`);
+  return (await response.json()) as T;
+}
+
 export async function apiDelete(path: string): Promise<void> {
   const response = await fetch(`${API_BASE_URL}${path}`, { method: 'DELETE' });
   if (!response.ok && response.status !== 204) {

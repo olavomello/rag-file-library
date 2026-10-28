@@ -13,9 +13,10 @@ tracking — all local, CPU-friendly, and resilient to restarts.
 
 1. **Parser port with per-format adapters.** A `DocumentParserRegistry` selects a
    parser by extension: PyMuPDF for PDF (per-page, 1-based page numbers), python-docx
-   for DOCX, and stdlib for TXT/Markdown. No OCR: a PDF with no text layer raises
-   `NoExtractableTextError`. Corrupted files raise `DocumentExtractionError`. Output is
-   a `ParsedDocument` of page-aware `TextBlock`s.
+   for DOCX, and stdlib for TXT/Markdown. OCR is opt-in (see ADR-0009): with it off, a
+   PDF with no text layer raises `NoExtractableTextError`; with it on, such pages (and
+   image uploads) are read via a local `OcrProvider`. Corrupted files raise
+   `DocumentExtractionError`. Output is a `ParsedDocument` of page-aware `TextBlock`s.
 
 2. **Chunking.** Paragraph-first splitting, falling back to sentences and then fixed
    word windows only when a single sentence exceeds the budget; a configurable token

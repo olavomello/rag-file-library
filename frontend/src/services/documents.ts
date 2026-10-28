@@ -1,4 +1,4 @@
-import { API_BASE_URL, apiDelete, apiGet, apiPost, apiUpload } from './apiClient';
+import { API_BASE_URL, apiDelete, apiGet, apiPost, apiUploadWithProgress } from './apiClient';
 import type {
   DocumentContentResponse,
   DocumentListResponse,
@@ -27,8 +27,11 @@ export function getDocumentContent(
   return apiGet<DocumentContentResponse>(`/documents/${id}/content`, signal);
 }
 
-export function uploadDocument(file: File): Promise<UploadResponse> {
-  return apiUpload<UploadResponse>('/documents/upload', file);
+export function uploadDocument(
+  file: File,
+  onProgress?: (percent: number) => void
+): Promise<UploadResponse> {
+  return apiUploadWithProgress<UploadResponse>('/documents/upload', file, onProgress);
 }
 
 export function deleteDocument(id: string): Promise<void> {

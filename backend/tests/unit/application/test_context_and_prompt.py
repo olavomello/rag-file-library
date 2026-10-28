@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from private_rag.application.dto.chat import ConversationTurn
 from private_rag.application.services.context_builder import ContextBuilder
 from private_rag.application.services.prompt_builder import PromptBuilder
 from private_rag.domain.entities.search_result import SearchResult
@@ -60,3 +61,22 @@ class TestPromptBuilder:
         assert "[Source 1] text" in prompt
         assert "What is the policy?" in prompt
         assert prompt.rstrip().endswith("Answer:")
+
+    def test_prompt_without_history_has_no_conversation_section(self) -> None:
+        prompt = PromptBuilder().build(question="q", context="c")
+        assert "Conversation so far" not in prompt
+
+    def test_prompt_includes_conversation_history(self) -> None:
+        history = [
+            ConversationTurn(role="user", content="Who is Olavo?"),
+            ConversationTurn(role="assistant", content="A Full Stack Developer."),
+        ]
+        prompt = PromptBuilder().build(
+            question="Date of birth?", context="[Source 1] text", history=history
+        )
+        assert "Conversation so far" in prompt
+        assert "Who is Olavo?" in prompt
+        assert "A Full Stack Developer." in prompt
+        # The current question still comes last, right before the answer.
+        assert prompt.rstrip().endswith("Answer:")
+        assert prompt.index("Who is Olavo?") < prompt.index("Date of birth?")

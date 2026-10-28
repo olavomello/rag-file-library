@@ -12,8 +12,9 @@ following Clean Architecture and Test-Driven Development, as specified in `AGENT
 
 ## 2. Implemented features
 
-- Document upload (PDF, DOCX, TXT, Markdown) with type/size/signature/UTF-8 validation,
-  SHA-256 duplicate detection, and safe server-generated storage.
+- Document upload (PDF, DOCX, TXT, Markdown, and images — PNG/JPG/TIFF/BMP/WEBP — when
+  OCR is enabled) with type/size/signature/UTF-8 validation, SHA-256 duplicate detection,
+  and safe server-generated storage.
 - Local text extraction with page numbers (PDF), chunking with overlap, and local
   embeddings via Ollama.
 - Embedded ChromaDB vector storage; document registry and chunk vectors; atomic JSON
@@ -91,7 +92,9 @@ worker thread so the API stays responsive during indexing.
 
 ## 10. Known limitations
 
-- No OCR: scanned PDFs with no text layer are reported, not processed.
+- OCR is opt-in (RapidOCR, CPU-only) and off by default; with it off, scanned PDFs with
+  no text layer are reported, not processed. OCR accuracy depends on scan quality and is
+  noticeably slower on CPU; the OCR language set is not yet configurable.
 - Settings can be changed via `PATCH /settings` (persisted overrides, applied on
   restart; see ADR-0008); the UI Settings page is still read-only, and live hot-reload
   is not implemented.
@@ -103,7 +106,8 @@ worker thread so the API stays responsive during indexing.
 ## 11. Future improvements
 
 PATCH settings with live reload, multiple knowledge bases, hybrid search / reranking,
-OCR, richer dashboard metrics, and adopting the AI-Dash enforcement layer.
+configurable OCR languages, richer dashboard metrics, and adopting the AI-Dash
+enforcement layer.
 
 ## 12. Acceptance criteria
 

@@ -8,6 +8,14 @@ from dataclasses import dataclass, field
 from private_rag.domain.value_objects.source_reference import SourceReference
 
 
+@dataclass(frozen=True, slots=True)
+class ConversationTurn:
+    """A prior message in the conversation, used to ground follow-up questions."""
+
+    role: str  # "user" | "assistant"
+    content: str
+
+
 @dataclass(slots=True)
 class Answer:
     """A complete grounded answer with its sources."""

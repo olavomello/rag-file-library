@@ -66,11 +66,15 @@ export function SettingsPage(): JSX.Element {
   const models = useQuery({ queryKey: ['models', 'status'], queryFn: () => fetchModelsStatus() });
 
   const [form, setForm] = useState<FormState | null>(null);
+  const [ocrEnabled, setOcrEnabled] = useState(false);
   const [result, setResult] = useState<{ reindex: boolean; restart: boolean; message: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (settings.data && !form) setForm(toForm(settings.data));
+    if (settings.data && !form) {
+      setForm(toForm(settings.data));
+      setOcrEnabled(settings.data.ocr_enabled);
+    }
   }, [settings.data, form]);
 
   const save = useMutation({
@@ -83,6 +87,7 @@ export function SettingsPage(): JSX.Element {
         message: response.message,
       });
       setForm(toForm(response.settings));
+      setOcrEnabled(response.settings.ocr_enabled);
       queryClient.invalidateQueries({ queryKey: ['settings'] });
       queryClient.invalidateQueries({ queryKey: ['models'] });
     },
@@ -95,7 +100,7 @@ export function SettingsPage(): JSX.Element {
   function onSave(event: React.FormEvent): void {
     event.preventDefault();
     if (!form) return;
-    const patch = toPatch(form);
+    const patch: SettingsUpdate = { ...toPatch(form), ocr_enabled: ocrEnabled };
     if (Object.values(patch).some((v) => typeof v === 'number' && Number.isNaN(v))) {
       setError('All numeric fields must be valid numbers.');
       return;
@@ -171,6 +176,23 @@ export function SettingsPage(): JSX.Element {
                 />
               ))}
             </div>
+
+            <label className="mt-4 flex items-start gap-3">
+              <input
+                type="checkbox"
+                checked={ocrEnabled}
+                onChange={(e) => setOcrEnabled(e.target.checked)}
+                className="mt-0.5 h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500 dark:border-slate-700 dark:bg-slate-950"
+              />
+              <span className="flex flex-col">
+                <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                  Enable OCR (scanned PDFs &amp; images)
+                </span>
+                <span className="text-xs text-slate-500 dark:text-slate-400">
+                  Uses local OCR; indexing scanned files is slower.
+                </span>
+              </span>
+            </label>
 
             <div className="mt-5 flex flex-wrap items-center gap-3">
               <button

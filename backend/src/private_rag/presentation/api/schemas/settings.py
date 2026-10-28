@@ -26,6 +26,7 @@ class SettingsResponse(BaseModel):
     max_upload_size_mb: int
     indexing_concurrency: int
     generation_concurrency: int
+    ocr_enabled: bool
 
     @classmethod
     def from_settings(cls, settings: Settings) -> SettingsResponse:
@@ -45,6 +46,7 @@ class SettingsResponse(BaseModel):
             max_upload_size_mb=settings.max_upload_size_mb,
             indexing_concurrency=settings.indexing_concurrency,
             generation_concurrency=settings.generation_concurrency,
+            ocr_enabled=settings.ocr_enabled,
         )
 
 
@@ -64,6 +66,7 @@ class SettingsUpdateRequest(BaseModel):
     max_upload_size_mb: int | None = Field(default=None, ge=1)
     indexing_concurrency: int | None = Field(default=None, ge=1)
     generation_concurrency: int | None = Field(default=None, ge=1)
+    ocr_enabled: bool | None = None
 
 
 class SettingsUpdateResponse(BaseModel):

@@ -42,6 +42,21 @@ class TestApplyOverrides:
         with pytest.raises(ValidationError):
             apply_overrides(_base(), {"chunk_overlap": 600})  # base chunk_size is 500
 
+    def test_round_trips_ocr_enabled(self) -> None:
+        assert apply_overrides(_base(), {"ocr_enabled": True}).ocr_enabled is True
+        assert apply_overrides(_base(), {"ocr_enabled": False}).ocr_enabled is False
+
+
+class TestOcrEnabledUpdate:
+    def test_enabling_ocr_requires_restart(self) -> None:
+        store = FakeStore()
+        result = UpdateSettingsUseCase(store=store, settings=_base()).execute(
+            {"ocr_enabled": True}
+        )
+        assert result.settings.ocr_enabled is True
+        assert result.requires_restart is True
+        assert store.data == {"ocr_enabled": True}
+
 
 class TestUpdateSettingsUseCase:
     def test_change_requires_restart_and_persists(self) -> None:

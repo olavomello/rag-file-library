@@ -2,14 +2,24 @@
 
 from __future__ import annotations
 
+from typing import Literal
+
 from pydantic import BaseModel, Field
 
 from private_rag.domain.value_objects.source_reference import SourceReference
 
 
+class ChatHistoryMessage(BaseModel):
+    """A prior message in the conversation, sent so follow-ups stay on-subject."""
+
+    role: Literal["user", "assistant"]
+    content: str = Field(min_length=1, max_length=8000)
+
+
 class ChatRequest(BaseModel):
     question: str = Field(min_length=1, max_length=4000)
     top_k: int | None = Field(default=None, ge=1, le=50)
+    history: list[ChatHistoryMessage] = Field(default_factory=list, max_length=20)
 
 
 class ChatSource(BaseModel):

@@ -68,6 +68,56 @@ export async function apiUpload<T>(path: string, file: File): Promise<T> {
   return (await response.json()) as T;
 }
 
+/** Upload a file via XHR so upload progress can be reported through `onProgress`. */
+export async function apiUploadWithProgress<T>(
+  path: string,
+  file: File,
+  onProgress?: (percent: number) => void
+): Promise<T> {
+  const form = new FormData();
+  form.append('file', file);
+
+  return new Promise<T>((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', `${API_BASE_URL}${path}`);
+    xhr.responseType = 'text';
+    xhr.setRequestHeader('Accept', 'application/json');
+
+    if (onProgress) {
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable) {
+          onProgress(Math.round((event.loaded / event.total) * 100));
+        }
+      };
+    }
+
+    const fail = (): void => {
+      let detail: string | undefined;
+      try {
+        const body = JSON.parse(xhr.responseText) as { detail?: unknown };
+        detail = typeof body.detail === 'string' ? body.detail : undefined;
+      } catch {
+        detail = undefined;
+      }
+      reject(new ApiError(`POST ${path} failed (${xhr.status})`, xhr.status, detail));
+    };
+
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          resolve(JSON.parse(xhr.responseText) as T);
+        } catch {
+          reject(new ApiError(`POST ${path} returned invalid JSON`, xhr.status));
+        }
+      } else {
+        fail();
+      }
+    };
+    xhr.onerror = () => reject(new ApiError(`POST ${path} failed (network error)`, 0));
+    xhr.send(form);
+  });
+}
+
 /** POST a JSON body and yield newline-delimited JSON events from the response. */
 export async function* apiPostStream<T>(
   path: string,

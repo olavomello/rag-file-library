@@ -6,6 +6,16 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+- **Local OCR (opt-in):** scanned PDFs and image uploads (PNG, JPG, JPEG, TIFF, BMP, WEBP) are indexed via RapidOCR — fully local, CPU-only, offline, no CUDA or external binary. Off by default; toggle **Enable OCR** in Settings (`OCR_ENABLED`, requires restart). The PDF parser falls back to OCR only for pages with no text layer; with OCR off, behaviour is unchanged (a scanned PDF still reports no extractable text). Added an `OcrProvider` port so the engine stays replaceable.
+- **Upload & indexing progress:** the Documents page shows a per-file progress bar during upload and a progress bar for documents while they are being indexed/converted.
+- **Concurrent chats:** each conversation streams independently — the Send button only blocks the conversation currently generating, so new or other chats stay usable while one or more are working.
+- **Chat loading indicators:** a minimalist typing indicator in the chat title (and sidebar) and in the message body while an answer streams.
+- **Collapsible sources:** chat answers no longer list sources inline; a small "Sources (N)" button reveals them on demand.
+
+### Fixed
+- **Follow-up questions kept their subject:** a short follow-up (e.g. "Date of birth" after "Who is Olavo?") now retrieves against the ongoing subject instead of matching unrelated people. Recent conversation turns are sent with the question and used both to anchor retrieval and to ground generation.
+
 ## [0.1.0] - 2026-10-27
 
 ### Added

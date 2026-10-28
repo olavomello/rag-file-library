@@ -9,6 +9,7 @@ from collections.abc import Iterator
 from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
 
+from private_rag.application.dto.chat import ConversationTurn
 from private_rag.application.exceptions import GenerationError
 from private_rag.container.container import Container
 from private_rag.presentation.api.dependencies.providers import get_container
@@ -21,6 +22,10 @@ from private_rag.presentation.api.schemas.chat import (
 router = APIRouter(prefix="/chat", tags=["chat"])
 
 
+def _history(request: ChatRequest) -> list[ConversationTurn]:
+    return [ConversationTurn(role=m.role, content=m.content) for m in request.history]
+
+
 @router.post("", response_model=ChatResponse)
 async def chat(
     request: ChatRequest,
@@ -29,6 +34,7 @@ async def chat(
     answer = await asyncio.to_thread(
         container.answer_question_use_case.answer,
         request.question,
+        history=_history(request),
         top_k=request.top_k,
     )
     return ChatResponse(
@@ -46,6 +52,7 @@ async def chat_stream(
     streamed = await asyncio.to_thread(
         container.answer_question_use_case.stream,
         request.question,
+        history=_history(request),
         top_k=request.top_k,
     )
 

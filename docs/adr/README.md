@@ -11,3 +11,4 @@ Records of significant architectural decisions for Private RAG. New ADRs start f
 - [0006 — RAG chat engine](./0006-rag-chat-engine.md) — Accepted
 - [0007 — Frontend application and shared OpenAPI spec](./0007-frontend-application-and-openapi-spec.md) — Accepted
 - [0008 — Mutable settings via persisted overrides](./0008-mutable-settings-via-persisted-overrides.md) — Accepted
+- [0009 — Optional local OCR for scanned PDFs and images](./0009-optional-local-ocr.md) — Accepted

@@ -71,3 +71,30 @@ class TestValidateUpload:
     def test_rejects_whitespace_only_text(self) -> None:
         with pytest.raises(EmptyDocumentError):
             validate_upload("a.md", b"   \n\t  ", max_size_bytes=MAX)
+
+    @pytest.mark.parametrize(
+        ("filename", "data", "mime"),
+        [
+            ("scan.png", b"\x89PNG\r\n\x1a\n\x00\x00", "image/png"),
+            ("scan.jpg", b"\xff\xd8\xff\xe0rest", "image/jpeg"),
+            ("scan.jpeg", b"\xff\xd8\xff\xe0rest", "image/jpeg"),
+            ("scan.bmp", b"BMrestofheader", "image/bmp"),
+            ("scan.tiff", b"II*\x00rest", "image/tiff"),
+            ("scan.tiff", b"MM\x00*rest", "image/tiff"),
+            ("scan.webp", b"RIFF\x00\x00\x00\x00WEBPVP8 ", "image/webp"),
+        ],
+    )
+    def test_accepts_valid_image_signatures(
+        self, filename: str, data: bytes, mime: str
+    ) -> None:
+        result = validate_upload(filename, data, max_size_bytes=MAX)
+        assert result.mime_type == mime
+
+    def test_rejects_image_with_wrong_signature(self) -> None:
+        with pytest.raises(InvalidFileContentError):
+            validate_upload("scan.png", b"not a png", max_size_bytes=MAX)
+
+    def test_rejects_image_larger_than_max(self) -> None:
+        payload = b"\x89PNG\r\n\x1a\n" + b"x" * (MAX + 1)
+        with pytest.raises(FileTooLargeError):
+            validate_upload("scan.png", payload, max_size_bytes=MAX)

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from private_rag.application.dto.chat import ConversationTurn
 from private_rag.application.services.context_builder import ContextBuilder
 from private_rag.application.services.prompt_builder import PromptBuilder
 from private_rag.application.use_cases.chat.answer_question import (
@@ -26,13 +27,16 @@ class FakeGeneration:
 
     def __init__(self) -> None:
         self.generate_calls = 0
+        self.last_prompt = ""
 
     def generate(self, prompt: str) -> str:
         self.generate_calls += 1
+        self.last_prompt = prompt
         assert "Context:" in prompt  # prompt was grounded
         return "  The vacation policy grants 20 days. "
 
     def stream_generate(self, prompt: str):  # type: ignore[no-untyped-def]
+        self.last_prompt = prompt
         yield from ["The ", "answer ", "here."]
 
 
@@ -90,3 +94,61 @@ def test_stream_without_results_is_insufficient() -> None:
     assert streamed.grounded is False
     assert streamed.sources == []
     assert "".join(streamed.tokens) == INSUFFICIENT_CONTEXT
+
+
+def test_history_biases_retrieval_query_toward_prior_subject() -> None:
+    """A short follow-up must retrieve against the ongoing subject, not alone.
+
+    Reproduces the reported bug: after "Who is Olavo?", asking "Date of birth"
+    must search with "Olavo" in the query so it does not match other people.
+    """
+    search = FakeSearch([_result()])
+    use_case = AnswerQuestionUseCase(
+        search=search,  # type: ignore[arg-type]
+        context_builder=ContextBuilder(max_chunks=5, max_chars=4000),
+        prompt_builder=PromptBuilder(),
+        generation=FakeGeneration(),
+        default_top_k=5,
+    )
+    history = [
+        ConversationTurn(role="user", content="Who is Olavo?"),
+        ConversationTurn(role="assistant", content="Olavo is a Full Stack Developer."),
+    ]
+
+    use_case.answer("Date of birth", history=history)
+
+    assert "Olavo" in search.calls[0]
+    assert "Date of birth" in search.calls[0]
+
+
+def test_history_is_included_in_the_generation_prompt() -> None:
+    search = FakeSearch([_result()])
+    gen = FakeGeneration()
+    use_case = AnswerQuestionUseCase(
+        search=search,  # type: ignore[arg-type]
+        context_builder=ContextBuilder(max_chunks=5, max_chars=4000),
+        prompt_builder=PromptBuilder(),
+        generation=gen,
+        default_top_k=5,
+    )
+    history = [ConversationTurn(role="user", content="Who is Olavo?")]
+
+    use_case.answer("Date of birth", history=history)
+
+    assert "Who is Olavo?" in gen.last_prompt
+    assert "Date of birth" in gen.last_prompt
+
+
+def test_no_history_searches_with_the_bare_question() -> None:
+    search = FakeSearch([_result()])
+    use_case = AnswerQuestionUseCase(
+        search=search,  # type: ignore[arg-type]
+        context_builder=ContextBuilder(max_chunks=5, max_chars=4000),
+        prompt_builder=PromptBuilder(),
+        generation=FakeGeneration(),
+        default_top_k=5,
+    )
+
+    use_case.answer("How many vacation days?")
+
+    assert search.calls[0] == "How many vacation days?"

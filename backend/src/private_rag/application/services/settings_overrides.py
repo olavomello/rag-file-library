@@ -28,6 +28,7 @@ OVERRIDABLE_FIELDS: dict[str, str] = {
     "max_upload_size_mb": "max_upload_size_mb",
     "indexing_concurrency": "indexing_concurrency",
     "generation_concurrency": "generation_concurrency",
+    "ocr_enabled": "ocr_enabled",
 }
 
 

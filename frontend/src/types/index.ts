@@ -129,6 +129,7 @@ export interface SettingsView {
   max_upload_size_mb: number;
   indexing_concurrency: number;
   generation_concurrency: number;
+  ocr_enabled: boolean;
 }
 
 export type SettingsUpdate = Partial<
@@ -147,6 +148,7 @@ export type SettingsUpdate = Partial<
     | 'max_upload_size_mb'
     | 'indexing_concurrency'
     | 'generation_concurrency'
+    | 'ocr_enabled'
   >
 >;
 

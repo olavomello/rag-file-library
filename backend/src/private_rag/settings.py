@@ -53,6 +53,12 @@ class Settings(BaseSettings):
     # --- Uploads ---
     max_upload_size_mb: int = Field(default=25, ge=1)
 
+    # --- OCR ---
+    # Opt-in local OCR (RapidOCR) for scanned PDFs and image files. Disabled by
+    # default so standard behaviour is unchanged; parsers are built at startup, so
+    # changing this requires a restart.
+    ocr_enabled: bool = False
+
     # --- Chunking ---
     chunk_size: int = Field(default=500, ge=1)
     chunk_overlap: int = Field(default=75, ge=0)

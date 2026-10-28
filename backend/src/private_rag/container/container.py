@@ -65,6 +65,7 @@ from private_rag.infrastructure.filesystem.json_settings_overrides import (
     JsonSettingsOverridesStore,
 )
 from private_rag.infrastructure.indexing.worker import IndexingWorker
+from private_rag.infrastructure.ocr.rapidocr_provider import RapidOcrProvider
 from private_rag.infrastructure.ollama.embedding_provider import OllamaEmbeddingProvider
 from private_rag.infrastructure.ollama.generation_provider import (
     OllamaGenerationProvider,
@@ -152,8 +153,16 @@ class Container:
     # --- Ingestion pipeline ---
 
     @cached_property
+    def ocr_provider(self) -> RapidOcrProvider:
+        # Constructed unconditionally (cheap); the heavy engine is lazily
+        # initialised on first use, and only when OCR is enabled.
+        return RapidOcrProvider()
+
+    @cached_property
     def parser_registry(self) -> ParserRegistry:
-        return ParserRegistry()
+        return ParserRegistry(
+            ocr=self.ocr_provider, ocr_enabled=self._settings.ocr_enabled
+        )
 
     @cached_property
     def chunker(self) -> Chunker:

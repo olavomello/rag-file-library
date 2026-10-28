@@ -15,8 +15,41 @@
         "title": "Body_upload_document_api_v1_documents_upload_post",
         "type": "object"
       },
+      "ChatHistoryMessage": {
+        "description": "A prior message in the conversation, sent so follow-ups stay on-subject.",
+        "properties": {
+          "content": {
+            "maxLength": 8000,
+            "minLength": 1,
+            "title": "Content",
+            "type": "string"
+          },
+          "role": {
+            "enum": [
+              "user",
+              "assistant"
+            ],
+            "title": "Role",
+            "type": "string"
+          }
+        },
+        "required": [
+          "role",
+          "content"
+        ],
+        "title": "ChatHistoryMessage",
+        "type": "object"
+      },
       "ChatRequest": {
         "properties": {
+          "history": {
+            "items": {
+              "$ref": "#/components/schemas/ChatHistoryMessage"
+            },
+            "maxItems": 20,
+            "title": "History",
+            "type": "array"
+          },
           "question": {
             "maxLength": 4000,
             "minLength": 1,
@@ -727,6 +760,10 @@
             "title": "Max Upload Size Mb",
             "type": "integer"
           },
+          "ocr_enabled": {
+            "title": "Ocr Enabled",
+            "type": "boolean"
+          },
           "rag_max_context_chars": {
             "title": "Rag Max Context Chars",
             "type": "integer"
@@ -759,7 +796,8 @@
           "rag_max_context_chars",
           "max_upload_size_mb",
           "indexing_concurrency",
-          "generation_concurrency"
+          "generation_concurrency",
+          "ocr_enabled"
         ],
         "title": "SettingsResponse",
         "type": "object"
@@ -874,6 +912,17 @@
               }
             ],
             "title": "Max Upload Size Mb"
+          },
+          "ocr_enabled": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ocr Enabled"
           },
           "rag_max_context_chars": {
             "anyOf": [

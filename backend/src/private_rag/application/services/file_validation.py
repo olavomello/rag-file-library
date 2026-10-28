@@ -22,9 +22,16 @@ SUPPORTED_TYPES: dict[str, str] = {
     ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     ".txt": "text/plain",
     ".md": "text/markdown",
+    ".png": "image/png",
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".tiff": "image/tiff",
+    ".bmp": "image/bmp",
+    ".webp": "image/webp",
 }
 
 _TEXT_EXTENSIONS = frozenset({".txt", ".md"})
+_IMAGE_EXTENSIONS = frozenset({".png", ".jpg", ".jpeg", ".tiff", ".bmp", ".webp"})
 
 
 @dataclass(frozen=True, slots=True)
@@ -59,6 +66,28 @@ def _check_signature(extension: str, data: bytes) -> None:
             raise InvalidFileContentError("Text file is not valid UTF-8") from exc
         if not text.strip():
             raise EmptyDocumentError("Text file has no readable content")
+    elif extension in _IMAGE_EXTENSIONS:
+        _check_image_signature(extension, data)
+
+
+def _check_image_signature(extension: str, data: bytes) -> None:
+    """Validate an image's magic bytes. Images are binary: no UTF-8 check."""
+    if extension == ".png":
+        valid = data.startswith(b"\x89PNG\r\n\x1a\n")
+    elif extension in (".jpg", ".jpeg"):
+        valid = data.startswith(b"\xff\xd8\xff")
+    elif extension == ".bmp":
+        valid = data.startswith(b"BM")
+    elif extension == ".tiff":
+        valid = data.startswith(b"II*\x00") or data.startswith(b"MM\x00*")
+    elif extension == ".webp":
+        valid = len(data) >= 12 and data.startswith(b"RIFF") and data[8:12] == b"WEBP"
+    else:  # pragma: no cover - unreachable, kept for exhaustiveness
+        valid = False
+    if not valid:
+        raise InvalidFileContentError(
+            f"File does not look like a valid {extension.lstrip('.').upper()} image"
+        )
 
 
 def validate_upload(filename: str, data: bytes, *, max_size_bytes: int) -> ValidatedUpload:

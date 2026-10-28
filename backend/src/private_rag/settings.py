@@ -49,6 +49,10 @@ class Settings(BaseSettings):
     ollama_max_output_tokens: int = Field(default=1024, ge=1)
     ollama_context_window: int = Field(default=4096, ge=256)
     ollama_request_timeout_seconds: float = Field(default=120.0, gt=0.0)
+    # Texts embedded per Ollama /api/embed request. Smaller batches avoid read
+    # timeouts on long documents (many chunks) on CPU; larger batches are faster
+    # once the model is warm.
+    embedding_batch_size: int = Field(default=16, ge=1)
 
     # --- Uploads ---
     max_upload_size_mb: int = Field(default=25, ge=1)

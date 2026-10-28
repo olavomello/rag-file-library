@@ -179,6 +179,7 @@ class Container:
             base_url=self._settings.ollama_base_url,
             model=self._settings.ollama_embedding_model,
             timeout_seconds=self._settings.ollama_request_timeout_seconds,
+            batch_size=self._settings.embedding_batch_size,
         )
 
     @cached_property

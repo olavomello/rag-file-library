@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
@@ -19,6 +19,29 @@ import type { DocumentView, IndexingJobView } from '../../types';
 
 const BASE_ACCEPT = '.pdf,.docx,.txt,.md';
 const IMAGE_ACCEPT = '.png,.jpg,.jpeg,.tiff,.bmp,.webp';
+
+type SortKey = 'name' | 'size' | 'uploaded' | 'status' | 'chunks';
+type SortDir = 'asc' | 'desc';
+interface SortState {
+  key: SortKey;
+  dir: SortDir;
+}
+
+const SORT_COLUMNS: { key: SortKey; label: string }[] = [
+  { key: 'name', label: 'Name' },
+  { key: 'size', label: 'Size' },
+  { key: 'uploaded', label: 'Uploaded' },
+  { key: 'status', label: 'Status' },
+  { key: 'chunks', label: 'Chunks' },
+];
+
+const COMPARATORS: Record<SortKey, (a: DocumentView, b: DocumentView) => number> = {
+  name: (a, b) => a.original_name.localeCompare(b.original_name, undefined, { sensitivity: 'base' }),
+  size: (a, b) => a.size_bytes - b.size_bytes,
+  uploaded: (a, b) => a.created_at.localeCompare(b.created_at),
+  status: (a, b) => a.status.localeCompare(b.status),
+  chunks: (a, b) => a.chunk_count - b.chunk_count,
+};
 
 const ACTIVE = new Set(['pending', 'processing', 'deleting']);
 
@@ -61,6 +84,25 @@ export function DocumentsPage(): JSX.Element {
   });
 
   const progressByDoc = latestProgressByDocument(jobs.data?.items ?? []);
+
+  // Sorting is client-side and opt-in: with no sort chosen, the API order is kept.
+  // Clicking a column cycles ascending -> descending -> back to the default order.
+  const [sort, setSort] = useState<SortState | null>(null);
+  const sortedItems = useMemo(() => {
+    const list = documents.data?.items ?? [];
+    if (!sort) return list;
+    const compare = COMPARATORS[sort.key];
+    const factor = sort.dir === 'asc' ? 1 : -1;
+    return [...list].sort((a, b) => factor * compare(a, b));
+  }, [documents.data?.items, sort]);
+
+  function onSort(key: SortKey): void {
+    setSort((prev) => {
+      if (!prev || prev.key !== key) return { key, dir: 'asc' };
+      if (prev.dir === 'asc') return { key, dir: 'desc' };
+      return null;
+    });
+  }
 
   const settings = useQuery({ queryKey: ['settings'], queryFn: () => fetchSettings() });
   const ocrEnabled = settings.data?.ocr_enabled ?? false;
@@ -218,23 +260,40 @@ export function DocumentsPage(): JSX.Element {
         <table className="w-full min-w-[640px] text-left text-sm">
           <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase text-slate-400 dark:border-slate-800 dark:bg-slate-800/50 dark:text-slate-500">
             <tr>
-              <th className="px-4 py-3">Name</th>
-              <th className="px-4 py-3">Size</th>
-              <th className="px-4 py-3">Uploaded</th>
-              <th className="px-4 py-3">Status</th>
-              <th className="px-4 py-3">Chunks</th>
+              {SORT_COLUMNS.map((column) => (
+                <th key={column.key} className="px-4 py-3">
+                  <button
+                    type="button"
+                    onClick={() => onSort(column.key)}
+                    aria-sort={
+                      sort?.key === column.key
+                        ? sort.dir === 'asc'
+                          ? 'ascending'
+                          : 'descending'
+                        : 'none'
+                    }
+                    className="inline-flex items-center gap-1 uppercase tracking-wide hover:text-slate-600 dark:hover:text-slate-300"
+                  >
+                    {column.label}
+                    <SortIndicator
+                      active={sort?.key === column.key}
+                      dir={sort?.key === column.key ? sort.dir : undefined}
+                    />
+                  </button>
+                </th>
+              ))}
               <th className="px-4 py-3 text-right">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {documents.data?.items.length === 0 && (
+            {sortedItems.length === 0 && (
               <tr>
                 <td colSpan={6} className="px-4 py-10 text-center text-slate-400 dark:text-slate-500">
                   No documents yet. Upload one above to get started.
                 </td>
               </tr>
             )}
-            {documents.data?.items.map((doc) => (
+            {sortedItems.map((doc) => (
               <tr key={doc.id} className="border-b border-slate-100 last:border-0 dark:border-slate-800">
                 <td className="px-4 py-3">
                   <span className="font-medium text-slate-800 dark:text-slate-200">{doc.original_name}</span>
@@ -339,4 +398,11 @@ function IndexingProgress({ progress }: { progress: number | undefined }): JSX.E
       )}
     </div>
   );
+}
+
+function SortIndicator({ active, dir }: { active: boolean; dir: SortDir | undefined }): JSX.Element {
+  if (!active || !dir) {
+    return <span className="text-slate-300 dark:text-slate-600">↕</span>;
+  }
+  return <span className="text-brand-600 dark:text-brand-300">{dir === 'asc' ? '▲' : '▼'}</span>;
 }

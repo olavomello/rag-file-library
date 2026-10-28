@@ -70,18 +70,31 @@ class ChromaChunkRepository:
         *,
         top_k: int,
         document_ids: Sequence[str] | None = None,
+        contains: Sequence[str] | None = None,
     ) -> list[SearchResult]:
         where = None
         if document_ids:
             where = {"document_id": {"$in": list(document_ids)}}
 
+        where_document = self._where_document(contains)
+
         result = self._collection().query(
             query_embeddings=[list(embedding)],
             n_results=top_k,
             where=where,
+            where_document=where_document,
             include=["documents", "metadatas", "distances"],
         )
         return self._map_results(result)
+
+    @staticmethod
+    def _where_document(contains: Sequence[str] | None) -> dict[str, Any] | None:
+        terms = [term for term in (contains or []) if term]
+        if not terms:
+            return None
+        if len(terms) == 1:
+            return {"$contains": terms[0]}
+        return {"$or": [{"$contains": term} for term in terms]}
 
     def delete_by_document(self, document_id: str) -> None:
         self._collection().delete(where={"document_id": document_id})

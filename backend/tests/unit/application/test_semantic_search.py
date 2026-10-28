@@ -40,24 +40,46 @@ class FakeDocuments:
         ]
 
 
+def _result(chunk_id: str, *, distance: float = 0.1) -> SearchResult:
+    return SearchResult(
+        document_id=chunk_id.split(":")[0],
+        document_name=f"{chunk_id.split(':')[0]}.txt",
+        chunk_id=chunk_id,
+        content="match",
+        distance=distance,
+        page_number=1,
+    )
+
+
 class FakeChunks:
     def __init__(self) -> None:
         self.calls: list[dict[str, object]] = []
 
-    def query(self, embedding, *, top_k, document_ids=None):  # type: ignore[no-untyped-def]
+    def query(self, embedding, *, top_k, document_ids=None, contains=None):  # type: ignore[no-untyped-def]
         self.calls.append(
-            {"embedding": embedding, "top_k": top_k, "document_ids": list(document_ids or [])}
+            {
+                "embedding": embedding,
+                "top_k": top_k,
+                "document_ids": list(document_ids or []),
+                "contains": list(contains or []),
+            }
         )
-        return [
-            SearchResult(
-                document_id="doc-a",
-                document_name="doc-a.txt",
-                chunk_id="doc-a:0",
-                content="match",
-                distance=0.1,
-                page_number=1,
-            )
-        ]
+        return [_result("doc-a:0")]
+
+
+class HybridChunks:
+    """Returns different hits for the semantic pass and the lexical (contains) pass."""
+
+    def __init__(self, semantic, lexical) -> None:  # type: ignore[no-untyped-def]
+        self._semantic = semantic
+        self._lexical = lexical
+        self.contains_calls: list[list[str]] = []
+
+    def query(self, embedding, *, top_k, document_ids=None, contains=None):  # type: ignore[no-untyped-def]
+        if contains:
+            self.contains_calls.append(list(contains))
+            return self._lexical
+        return self._semantic
 
 
 class FakeEmbeddings:
@@ -120,3 +142,34 @@ def test_explicit_top_k_is_passed_through() -> None:
     chunks = FakeChunks()
     _use_case(["doc-a"], chunks, FakeEmbeddings()).execute("policy", top_k=3)
     assert chunks.calls[0]["top_k"] == 3
+
+
+def test_lexical_pass_uses_query_keyword_variants() -> None:
+    chunks = FakeChunks()
+    _use_case(["doc-a"], chunks, FakeEmbeddings()).execute("Temos algo sobre SEO?")
+    # The semantic call carries no contains; the lexical call matches "SEO" variants.
+    assert chunks.calls[0]["contains"] == []
+    lexical = next(c for c in chunks.calls if c["contains"])
+    assert "SEO" in lexical["contains"]
+    assert "seo" in lexical["contains"]
+
+
+def test_hybrid_surfaces_exact_term_hit_ranked_low_by_semantics() -> None:
+    # Semantic ranks irrelevant chunks first; the SEO chunk only appears via lexical.
+    semantic = [_result("fin:0", distance=0.47), _result("fin:1", distance=0.64)]
+    lexical = [_result("seo:0", distance=0.71)]
+    chunks = HybridChunks(semantic, lexical)
+    results = _use_case(["fin", "seo"], chunks, FakeEmbeddings(), default_top_k=2).execute(
+        "SEO"
+    )
+    ids = [r.chunk_id for r in results]
+    assert "seo:0" in ids  # the exact-term chunk is now included
+    assert ids[0] == "seo:0"  # lexical hit is interleaved first
+    assert len(results) == 2
+
+
+def test_no_keywords_falls_back_to_pure_semantic() -> None:
+    chunks = FakeChunks()
+    # A query made only of stop words yields no keywords, so no lexical pass runs.
+    _use_case(["doc-a"], chunks, FakeEmbeddings()).execute("o que é isso")
+    assert all(call["contains"] == [] for call in chunks.calls)

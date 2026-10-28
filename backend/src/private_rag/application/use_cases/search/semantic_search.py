@@ -3,9 +3,14 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
+from itertools import zip_longest
 
 from private_rag.application.exceptions import InvalidSearchQueryError
 from private_rag.application.ports.embeddings import EmbeddingProvider
+from private_rag.application.services.keyword_extraction import (
+    contains_variants,
+    extract_keywords,
+)
 from private_rag.domain.entities.search_result import SearchResult
 from private_rag.domain.repositories.chunk_repository import ChunkVectorRepository
 from private_rag.domain.repositories.document_repository import DocumentRepository
@@ -13,11 +18,14 @@ from private_rag.domain.value_objects.document_status import DocumentStatus
 
 
 class SemanticSearchUseCase:
-    """Embeds a query and retrieves the closest chunks.
+    """Hybrid retrieval: semantic (vector) search plus a lexical keyword pass.
 
-    Results are restricted to documents that are fully ``INDEXED``, so a document
-    that is still processing or failed never surfaces partial content. The LLM is
-    not involved; only the embedding model and vector store are used.
+    Pure vector search ranks short exact terms (acronyms like "SEO") poorly, so a
+    lexical pass retrieves chunks that literally contain the query's keywords and
+    the two are interleaved — keeping strong semantic matches while surfacing exact
+    terms. Results are restricted to fully ``INDEXED`` documents, so a document that
+    is still processing or failed never surfaces partial content. The LLM is not
+    involved; only the embedding model and vector store are used.
     """
 
     def __init__(
@@ -56,7 +64,41 @@ class SemanticSearchUseCase:
             return []
 
         embedding = self._embeddings.embed_query(cleaned)
-        limit = top_k if top_k is not None else self._default_top_k
-        return self._chunks.query(
-            embedding, top_k=max(1, limit), document_ids=indexed_ids
+        limit = max(1, top_k if top_k is not None else self._default_top_k)
+
+        semantic = self._chunks.query(
+            embedding, top_k=limit, document_ids=indexed_ids
         )
+
+        keywords = extract_keywords(cleaned)
+        lexical: list[SearchResult] = []
+        if keywords:
+            lexical = self._chunks.query(
+                embedding,
+                top_k=limit,
+                document_ids=indexed_ids,
+                contains=contains_variants(keywords),
+            )
+
+        return self._interleave(lexical, semantic, limit)
+
+    @staticmethod
+    def _interleave(
+        lexical: list[SearchResult], semantic: list[SearchResult], limit: int
+    ) -> list[SearchResult]:
+        """Interleave exact-term hits with semantic hits, deduped, up to ``limit``.
+
+        Taking lexical first in each pair surfaces exact-term chunks that vector
+        search alone ranks too low, without dropping the best semantic matches.
+        """
+        merged: list[SearchResult] = []
+        seen: set[str] = set()
+        for lex, sem in zip_longest(lexical, semantic):
+            for result in (lex, sem):
+                if result is None or result.chunk_id in seen:
+                    continue
+                seen.add(result.chunk_id)
+                merged.append(result)
+                if len(merged) >= limit:
+                    return merged
+        return merged

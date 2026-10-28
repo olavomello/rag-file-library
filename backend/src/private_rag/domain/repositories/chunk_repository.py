@@ -37,8 +37,13 @@ class ChunkVectorRepository(Protocol):
         *,
         top_k: int,
         document_ids: Sequence[str] | None = None,
+        contains: Sequence[str] | None = None,
     ) -> list[SearchResult]:
-        """Return the ``top_k`` closest chunks, optionally scoped to documents."""
+        """Return the ``top_k`` closest chunks, optionally scoped to documents.
+
+        When ``contains`` is given, results are additionally restricted to chunks
+        whose text literally contains at least one of those terms (lexical filter).
+        """
         ...
 
     def delete_by_document(self, document_id: str) -> None:

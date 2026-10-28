@@ -4,7 +4,12 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { StatusBadge } from '../../components/StatusBadge';
 import { useTheme, type ThemePreference } from '../../app/theme';
 import { ApiError } from '../../services/apiClient';
-import { fetchModelsStatus, fetchSettings, updateSettings } from '../../services/dashboard';
+import {
+  fetchModelsStatus,
+  fetchSettings,
+  pullModel,
+  updateSettings,
+} from '../../services/dashboard';
 import type { SettingsUpdate, SettingsView } from '../../types';
 
 type FormState = Record<string, string>;
@@ -112,6 +117,10 @@ export function SettingsPage(): JSX.Element {
     setForm((prev) => (prev ? { ...prev, [key]: value } : prev));
   }
 
+  function refreshModels(): void {
+    queryClient.invalidateQueries({ queryKey: ['models'] });
+  }
+
   return (
     <div>
       <header className="mb-6">
@@ -164,8 +173,6 @@ export function SettingsPage(): JSX.Element {
         ) : (
           <>
             <div className="grid gap-4 sm:grid-cols-2">
-              <TextField label="Generation model" value={form.generation_model ?? ''} onChange={(v) => set('generation_model', v)} />
-              <TextField label="Embedding model" value={form.embedding_model ?? ''} onChange={(v) => set('embedding_model', v)} />
               {NUMBER_FIELDS.map((field) => (
                 <NumberField
                   key={field.key}
@@ -193,6 +200,25 @@ export function SettingsPage(): JSX.Element {
                 </span>
               </span>
             </label>
+
+            <div className="mt-5 space-y-3 rounded-lg border border-slate-200 p-4 dark:border-slate-800">
+              <h4 className="text-sm font-medium text-slate-700 dark:text-slate-200">Models</h4>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <TextField label="Generation model" value={form.generation_model ?? ''} onChange={(v) => set('generation_model', v)} />
+                <TextField label="Embedding model" value={form.embedding_model ?? ''} onChange={(v) => set('embedding_model', v)} />
+              </div>
+              <div className="space-y-2 border-t border-slate-200 pt-3 dark:border-slate-800">
+                <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                  Download / activate models
+                </p>
+                <p className="text-xs text-slate-400 dark:text-slate-500">
+                  Downloads the model into Ollama (local, free). After it finishes, Save settings and
+                  restart to use it. Changing the embedding model also requires re-indexing.
+                </p>
+                <PullControl label="Generation" model={form.generation_model ?? ''} onDone={refreshModels} />
+                <PullControl label="Embedding" model={form.embedding_model ?? ''} onDone={refreshModels} />
+              </div>
+            </div>
 
             <div className="mt-5 flex flex-wrap items-center gap-3">
               <button
@@ -295,5 +321,91 @@ function NumberField({
         className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-brand-500 focus:outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
       />
     </label>
+  );
+}
+
+function PullControl({
+  label,
+  model,
+  onDone,
+}: {
+  label: string;
+  model: string;
+  onDone: () => void;
+}): JSX.Element {
+  const [state, setState] = useState<'idle' | 'pulling' | 'done' | 'error'>('idle');
+  const [message, setMessage] = useState('');
+  const [percent, setPercent] = useState<number | null>(null);
+
+  async function run(): Promise<void> {
+    const name = model.trim();
+    if (!name || state === 'pulling') return;
+    setState('pulling');
+    setMessage('starting…');
+    setPercent(null);
+    try {
+      for await (const event of pullModel(name)) {
+        if (event.type === 'progress') {
+          setMessage(event.status || 'downloading…');
+          setPercent(
+            event.total && event.completed != null
+              ? Math.round((event.completed / event.total) * 100)
+              : null
+          );
+        } else if (event.type === 'error') {
+          setState('error');
+          setMessage(event.detail || 'download failed');
+          return;
+        } else {
+          setState('done');
+          setMessage('ready — save & restart to use');
+          setPercent(100);
+          onDone();
+          return;
+        }
+      }
+    } catch (error) {
+      setState('error');
+      setMessage(error instanceof ApiError ? error.detail ?? error.message : 'download failed');
+    }
+  }
+
+  const tone =
+    state === 'error'
+      ? 'text-rose-600 dark:text-rose-400'
+      : state === 'done'
+        ? 'text-emerald-600 dark:text-emerald-400'
+        : 'text-slate-500 dark:text-slate-400';
+
+  return (
+    <div className="flex flex-col gap-1">
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={() => void run()}
+          disabled={state === 'pulling' || !model.trim()}
+          className="shrink-0 rounded-md border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 hover:border-brand-400 hover:text-brand-600 disabled:opacity-50 dark:border-slate-700 dark:text-slate-200 dark:hover:text-brand-300"
+        >
+          {state === 'pulling' ? 'Downloading…' : `Download ${label.toLowerCase()} model`}
+        </button>
+        <span className={`truncate text-xs ${tone}`}>
+          {model.trim() || '—'}
+          {message && ` · ${message}`}
+          {percent != null && state === 'pulling' && ` ${percent}%`}
+        </span>
+      </div>
+      {state === 'pulling' && (
+        <div className="h-1 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
+          {percent != null ? (
+            <div
+              className="h-full rounded-full bg-brand-500 transition-all"
+              style={{ width: `${percent}%` }}
+            />
+          ) : (
+            <div className="h-full w-full animate-pulse rounded-full bg-brand-400/60" />
+          )}
+        </div>
+      )}
+    </div>
   );
 }

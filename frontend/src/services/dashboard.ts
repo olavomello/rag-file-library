@@ -1,4 +1,4 @@
-import { apiGet, apiPatch } from './apiClient';
+import { apiGet, apiPatch, apiPostStream } from './apiClient';
 import type {
   DashboardStats,
   ModelsStatus,
@@ -6,6 +6,16 @@ import type {
   SettingsUpdateResponse,
   SettingsView,
 } from '../types';
+
+/** NDJSON events streamed by POST /models/pull while a model downloads. */
+export type ModelPullEvent =
+  | { type: 'progress'; status: string; completed: number | null; total: number | null }
+  | { type: 'done' }
+  | { type: 'error'; detail: string };
+
+export function pullModel(model: string, signal?: AbortSignal): AsyncGenerator<ModelPullEvent> {
+  return apiPostStream<ModelPullEvent>('/models/pull', { model }, signal);
+}
 
 export function fetchDashboardStats(signal?: AbortSignal): Promise<DashboardStats> {
   return apiGet<DashboardStats>('/dashboard/stats', signal);

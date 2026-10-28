@@ -72,6 +72,7 @@ from private_rag.infrastructure.ollama.generation_provider import (
 )
 from private_rag.infrastructure.ollama.health_probe import OllamaHealthProbe
 from private_rag.infrastructure.ollama.model_catalog import OllamaModelCatalog
+from private_rag.infrastructure.ollama.model_puller import OllamaModelPuller
 from private_rag.infrastructure.parsers.registry import ParserRegistry
 from private_rag.settings import Settings
 
@@ -255,6 +256,10 @@ class Container:
             base_url=self._settings.ollama_base_url,
             timeout_seconds=min(self._settings.ollama_request_timeout_seconds, 5.0),
         )
+
+    @cached_property
+    def model_puller(self) -> OllamaModelPuller:
+        return OllamaModelPuller(base_url=self._settings.ollama_base_url)
 
     # --- Settings ---
 

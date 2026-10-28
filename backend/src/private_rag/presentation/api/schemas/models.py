@@ -2,7 +2,13 @@
 
 from __future__ import annotations
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+
+
+class ModelPullRequest(BaseModel):
+    """Request to download (pull) a model into the local Ollama instance."""
+
+    model: str = Field(min_length=1, max_length=128, pattern=r"^[A-Za-z0-9._:/-]+$")
 
 
 class ModelsStatusResponse(BaseModel):

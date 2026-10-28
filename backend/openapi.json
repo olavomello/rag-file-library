@@ -520,6 +520,23 @@
         "title": "LivenessResponse",
         "type": "object"
       },
+      "ModelPullRequest": {
+        "description": "Request to download (pull) a model into the local Ollama instance.",
+        "properties": {
+          "model": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9._:/-]+$",
+            "title": "Model",
+            "type": "string"
+          }
+        },
+        "required": [
+          "model"
+        ],
+        "title": "ModelPullRequest",
+        "type": "object"
+      },
       "ModelsResponse": {
         "properties": {
           "available_models": {
@@ -1704,6 +1721,46 @@
           }
         },
         "summary": "List Models",
+        "tags": [
+          "models"
+        ]
+      }
+    },
+    "/api/v1/models/pull": {
+      "post": {
+        "description": "Download a model into Ollama, streaming NDJSON progress events.\n\nEvents: ``{\"type\":\"progress\",\"status\":...,\"completed\":...,\"total\":...}``,\nthen ``{\"type\":\"done\"}`` or ``{\"type\":\"error\",\"detail\":...}``.",
+        "operationId": "pull_model_api_v1_models_pull_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModelPullRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Pull Model",
         "tags": [
           "models"
         ]

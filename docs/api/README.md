@@ -32,6 +32,7 @@ drifts from the code.
 | POST | `/chat` | Grounded answer with sources |
 | POST | `/chat/stream` | Streaming answer (NDJSON: `sources` → `token` → `done`) |
 | GET | `/models` · `/models/status` | Configured models and availability |
+| POST | `/models/pull` | Download a model into Ollama (NDJSON progress) |
 | GET | `/dashboard/stats` | Document/chunk/job counts |
 | GET | `/settings` | Effective configuration (no filesystem paths) |
 | PATCH | `/settings` | Update settings overrides (persisted; applied on restart) |

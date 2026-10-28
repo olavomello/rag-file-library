@@ -263,12 +263,21 @@ export function DocumentsPage(): JSX.Element {
                     >
                       Download
                     </a>
-                    <button
-                      className="text-slate-600 hover:text-brand-600 dark:text-slate-300 dark:hover:text-brand-300"
-                      onClick={() => reindex.mutate(doc.id)}
-                    >
-                      Reindex
-                    </button>
+                    {doc.status === 'failed' ? (
+                      <button
+                        className="font-semibold text-brand-600 hover:text-brand-700 dark:text-brand-300 dark:hover:text-brand-200"
+                        onClick={() => reindex.mutate(doc.id)}
+                      >
+                        Retry
+                      </button>
+                    ) : (
+                      <button
+                        className="text-slate-600 hover:text-brand-600 dark:text-slate-300 dark:hover:text-brand-300"
+                        onClick={() => reindex.mutate(doc.id)}
+                      >
+                        Reindex
+                      </button>
+                    )}
                     <button
                       className="text-rose-500 hover:text-rose-700 dark:hover:text-rose-400"
                       onClick={() => onDelete(doc)}

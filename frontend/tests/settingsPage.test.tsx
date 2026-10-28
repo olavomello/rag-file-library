@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { ThemeProvider } from '../src/app/theme';
 import { SettingsPage } from '../src/features/settings/SettingsPage';
-import type { ModelsStatus, SettingsView } from '../src/types';
+import type { ModelsResponse, ModelsStatus, SettingsView } from '../src/types';
 
 const settings: SettingsView = {
   app_name: 'Private RAG',
@@ -33,10 +33,17 @@ const models: ModelsStatus = {
   embedding_available: true,
 };
 
+const modelsList: ModelsResponse = {
+  ...models,
+  available_models: ['qwen3:0.6b', 'qwen3:1.7b', 'embeddinggemma:latest'],
+};
+
 vi.mock('../src/services/dashboard', () => ({
   fetchSettings: () => Promise.resolve(settings),
   fetchModelsStatus: () => Promise.resolve(models),
+  fetchModels: () => Promise.resolve(modelsList),
   updateSettings: vi.fn(),
+  pullModel: vi.fn(),
 }));
 
 function renderPage(): void {
@@ -58,5 +65,12 @@ describe('SettingsPage', () => {
     });
     expect(checkbox).toBeInTheDocument();
     expect(checkbox).toBeChecked();
+  });
+
+  it('lists the installed Ollama models', async () => {
+    renderPage();
+    expect(await screen.findByText('qwen3:1.7b')).toBeInTheDocument();
+    expect(screen.getByText('embeddinggemma:latest')).toBeInTheDocument();
+    expect(screen.getByText(/Installed models \(3\)/i)).toBeInTheDocument();
   });
 });

@@ -166,3 +166,7 @@ export interface ModelsStatus {
   generation_available: boolean;
   embedding_available: boolean;
 }
+
+export interface ModelsResponse extends ModelsStatus {
+  available_models: string[];
+}

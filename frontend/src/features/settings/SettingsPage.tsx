@@ -5,6 +5,7 @@ import { StatusBadge } from '../../components/StatusBadge';
 import { useTheme, type ThemePreference } from '../../app/theme';
 import { ApiError } from '../../services/apiClient';
 import {
+  fetchModels,
   fetchModelsStatus,
   fetchSettings,
   pullModel,
@@ -69,6 +70,8 @@ export function SettingsPage(): JSX.Element {
   const { preference, setPreference } = useTheme();
   const settings = useQuery({ queryKey: ['settings'], queryFn: () => fetchSettings() });
   const models = useQuery({ queryKey: ['models', 'status'], queryFn: () => fetchModelsStatus() });
+  const installed = useQuery({ queryKey: ['models', 'list'], queryFn: () => fetchModels() });
+  const availableModels = installed.data?.available_models ?? [];
 
   const [form, setForm] = useState<FormState | null>(null);
   const [ocrEnabled, setOcrEnabled] = useState(false);
@@ -205,8 +208,35 @@ export function SettingsPage(): JSX.Element {
             <div className="mt-5 space-y-3 rounded-lg border border-slate-200 p-4 dark:border-slate-800">
               <h4 className="text-sm font-medium text-slate-700 dark:text-slate-200">Models</h4>
               <div className="grid gap-4 sm:grid-cols-2">
-                <TextField label="Generation model" value={form.generation_model ?? ''} onChange={(v) => set('generation_model', v)} />
-                <TextField label="Embedding model" value={form.embedding_model ?? ''} onChange={(v) => set('embedding_model', v)} />
+                <TextField label="Generation model" value={form.generation_model ?? ''} onChange={(v) => set('generation_model', v)} options={availableModels} />
+                <TextField label="Embedding model" value={form.embedding_model ?? ''} onChange={(v) => set('embedding_model', v)} options={availableModels} />
+              </div>
+              <div>
+                <p className="mb-1.5 text-xs font-medium text-slate-500 dark:text-slate-400">
+                  Installed models{availableModels.length > 0 && ` (${availableModels.length})`}
+                  {installed.data && !installed.data.ollama_available && (
+                    <span className="ml-1 font-normal text-rose-500">Ollama offline</span>
+                  )}
+                </p>
+                {availableModels.length === 0 ? (
+                  <p className="text-xs text-slate-400 dark:text-slate-500">
+                    {installed.isLoading ? 'Loading…' : 'None found.'}
+                  </p>
+                ) : (
+                  <div className="flex flex-wrap gap-1.5">
+                    {availableModels.map((name) => (
+                      <button
+                        key={name}
+                        type="button"
+                        title="Set as generation model"
+                        onClick={() => set('generation_model', name)}
+                        className="rounded-full border border-slate-300 px-2.5 py-0.5 text-xs text-slate-600 transition-colors hover:border-brand-400 hover:text-brand-600 dark:border-slate-700 dark:text-slate-300 dark:hover:text-brand-300"
+                      >
+                        {name}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
               <div className="space-y-2 border-t border-slate-200 pt-3 dark:border-slate-800">
                 <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
@@ -283,19 +313,30 @@ function TextField({
   label,
   value,
   onChange,
+  options,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
+  options?: string[];
 }): JSX.Element {
+  const listId = options ? `opts-${label.replace(/\s+/g, '-').toLowerCase()}` : undefined;
   return (
     <label className="flex flex-col gap-1">
       <span className="text-xs font-medium text-slate-500 dark:text-slate-400">{label}</span>
       <input
         value={value}
+        list={listId}
         onChange={(e) => onChange(e.target.value)}
         className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-brand-500 focus:outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
       />
+      {listId && (
+        <datalist id={listId}>
+          {options!.map((option) => (
+            <option key={option} value={option} />
+          ))}
+        </datalist>
+      )}
     </label>
   );
 }

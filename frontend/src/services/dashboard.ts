@@ -1,6 +1,7 @@
 import { apiGet, apiPatch, apiPostStream } from './apiClient';
 import type {
   DashboardStats,
+  ModelsResponse,
   ModelsStatus,
   SettingsUpdate,
   SettingsUpdateResponse,
@@ -27,6 +28,10 @@ export function fetchSettings(signal?: AbortSignal): Promise<SettingsView> {
 
 export function fetchModelsStatus(signal?: AbortSignal): Promise<ModelsStatus> {
   return apiGet<ModelsStatus>('/models/status', signal);
+}
+
+export function fetchModels(signal?: AbortSignal): Promise<ModelsResponse> {
+  return apiGet<ModelsResponse>('/models', signal);
 }
 
 export function updateSettings(patch: SettingsUpdate): Promise<SettingsUpdateResponse> {

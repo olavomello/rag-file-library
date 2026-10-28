@@ -9,16 +9,22 @@ from private_rag.application.ports.clock import Clock
 from private_rag.application.ports.file_store import FileStore
 from private_rag.application.services.file_validation import validate_upload
 from private_rag.application.services.naming import build_stored_name
+from private_rag.application.use_cases.documents.delete_document import (
+    DeleteDocumentUseCase,
+)
 from private_rag.domain.entities.document import Document
 from private_rag.domain.repositories.document_repository import DocumentRepository
 from private_rag.domain.services.hashing import sha256_hex
+from private_rag.domain.value_objects.document_status import DocumentStatus
 
 
 class UploadDocumentUseCase:
     """Validates, deduplicates, and stores an uploaded document.
 
     Duplicate detection is by SHA-256 checksum: re-uploading identical content
-    returns the existing document instead of storing a second copy.
+    returns the existing document instead of storing a second copy. A previous
+    attempt that *failed* is the exception — it is removed and the file is stored
+    and queued again, so a failed upload can simply be retried.
     """
 
     def __init__(
@@ -28,11 +34,13 @@ class UploadDocumentUseCase:
         storage: FileStore,
         clock: Clock,
         max_upload_size_bytes: int,
+        delete: DeleteDocumentUseCase | None = None,
     ) -> None:
         self._documents = documents
         self._storage = storage
         self._clock = clock
         self._max_upload_size_bytes = max_upload_size_bytes
+        self._delete = delete
 
     def execute(self, *, filename: str, data: bytes) -> UploadResult:
         validated = validate_upload(
@@ -42,7 +50,11 @@ class UploadDocumentUseCase:
         checksum = sha256_hex(data)
         existing = self._documents.get_by_checksum(checksum)
         if existing is not None:
-            return UploadResult(document=existing, is_duplicate=True)
+            if existing.status is DocumentStatus.FAILED and self._delete is not None:
+                # Drop the failed attempt so the same file can be retried fresh.
+                self._delete.execute(existing.id)
+            else:
+                return UploadResult(document=existing, is_duplicate=True)
 
         document_id = str(uuid.uuid4())
         stored_name = build_stored_name(document_id, validated.extension)

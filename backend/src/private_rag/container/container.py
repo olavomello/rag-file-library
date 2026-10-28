@@ -123,6 +123,7 @@ class Container:
             storage=self.file_storage,
             clock=self.clock,
             max_upload_size_bytes=self._settings.max_upload_size_bytes,
+            delete=self.delete_document_use_case,
         )
 
     @cached_property

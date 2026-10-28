@@ -92,9 +92,9 @@ worker thread so the API stays responsive during indexing.
 
 ## 10. Known limitations
 
-- OCR is opt-in (RapidOCR, CPU-only) and off by default; with it off, scanned PDFs with
-  no text layer are reported, not processed. OCR accuracy depends on scan quality and is
-  noticeably slower on CPU; the OCR language set is not yet configurable.
+- OCR (RapidOCR, CPU-only) is on by default and can be turned off; with it off, scanned
+  PDFs with no text layer are reported, not processed. OCR accuracy depends on scan
+  quality and is noticeably slower on CPU; the OCR language set is not yet configurable.
 - Settings can be changed via `PATCH /settings` (persisted overrides, applied on
   restart; see ADR-0008); the UI Settings page is still read-only, and live hot-reload
   is not implemented.

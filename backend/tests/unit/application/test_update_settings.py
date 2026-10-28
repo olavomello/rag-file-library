@@ -48,14 +48,15 @@ class TestApplyOverrides:
 
 
 class TestOcrEnabledUpdate:
-    def test_enabling_ocr_requires_restart(self) -> None:
+    def test_toggling_ocr_requires_restart(self) -> None:
+        # OCR is on by default, so disabling it is the change that needs a restart.
         store = FakeStore()
         result = UpdateSettingsUseCase(store=store, settings=_base()).execute(
-            {"ocr_enabled": True}
+            {"ocr_enabled": False}
         )
-        assert result.settings.ocr_enabled is True
+        assert result.settings.ocr_enabled is False
         assert result.requires_restart is True
-        assert store.data == {"ocr_enabled": True}
+        assert store.data == {"ocr_enabled": False}
 
 
 class TestUpdateSettingsUseCase:

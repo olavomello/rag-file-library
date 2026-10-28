@@ -14,7 +14,7 @@ the app.
 
 ## Decision
 
-Add opt-in local OCR behind a port, off by default.
+Add local OCR behind a port, on by default (it can be turned off).
 
 - **Engine: RapidOCR (`rapidocr-onnxruntime`).** Runs on CPU via ONNX Runtime with no
   CUDA dependency and no external system binary to install, and works offline — unlike
@@ -23,10 +23,12 @@ Add opt-in local OCR behind a port, off by default.
   OCR is enabled.
 - **`OcrProvider` port** (`application/ports/ocr.py`) with a `RapidOcrProvider`
   infrastructure adapter, so the engine stays replaceable and tests use a fake.
-- **Opt-in via `ocr_enabled` (default `false`).** It is a normal overridable setting
-  (`OCR_ENABLED`, `PATCH /settings`); changing it sets `requires_restart` because parsers
-  are built at startup. With OCR off, behaviour is identical to ADR-0003 (scanned PDF →
-  `NoExtractableTextError`).
+- **`ocr_enabled` (default `true`).** It is a normal overridable setting (`OCR_ENABLED`,
+  `PATCH /settings`); changing it sets `requires_restart` because parsers are built at
+  startup. With OCR off, behaviour is identical to ADR-0003 (scanned PDF →
+  `NoExtractableTextError`). `GET /settings` returns the effective-after-restart view
+  (saved overrides applied), so a saved toggle is reflected immediately even though it
+  takes effect on the next restart.
 - **Two entry points:** an `ImageParser` for PNG/JPG/JPEG/TIFF/BMP/WEBP (validated by
   magic bytes), and an OCR fallback in `PdfParser` that rasterises only the pages with no
   text layer. The fast text path for normal PDFs is unchanged. OCR runs inside the

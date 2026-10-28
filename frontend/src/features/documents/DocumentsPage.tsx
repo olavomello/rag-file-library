@@ -1,8 +1,10 @@
 import { useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { DocumentStatusBadge } from '../../components/DocumentStatusBadge';
 import { ApiError } from '../../services/apiClient';
+import { fetchSettings } from '../../services/dashboard';
 import {
   deleteDocument,
   documentDownloadUrl,
@@ -14,6 +16,9 @@ import {
 import { listIndexingJobs } from '../../services/indexing';
 import { formatBytes, formatDate } from '../../lib/format';
 import type { DocumentView, IndexingJobView } from '../../types';
+
+const BASE_ACCEPT = '.pdf,.docx,.txt,.md';
+const IMAGE_ACCEPT = '.png,.jpg,.jpeg,.tiff,.bmp,.webp';
 
 const ACTIVE = new Set(['pending', 'processing', 'deleting']);
 
@@ -56,6 +61,10 @@ export function DocumentsPage(): JSX.Element {
   });
 
   const progressByDoc = latestProgressByDocument(jobs.data?.items ?? []);
+
+  const settings = useQuery({ queryKey: ['settings'], queryFn: () => fetchSettings() });
+  const ocrEnabled = settings.data?.ocr_enabled ?? false;
+  const acceptTypes = ocrEnabled ? `${BASE_ACCEPT},${IMAGE_ACCEPT}` : BASE_ACCEPT;
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ['documents'] });
 
@@ -148,13 +157,20 @@ export function DocumentsPage(): JSX.Element {
           </button>
         </p>
         <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
-          PDF, DOCX, TXT, Markdown — plus images (PNG, JPG, TIFF, BMP, WEBP) when OCR is enabled
+          {ocrEnabled ? 'PDF, DOCX, TXT, Markdown, PNG, JPG, TIFF, BMP, WEBP' : 'PDF, DOCX, TXT, Markdown'}
         </p>
+        {!ocrEnabled && (
+          <p className="mt-1 text-xs">
+            <Link to="/settings" className="font-medium text-brand-600 hover:underline dark:text-brand-300">
+              Enable OCR for more conversions
+            </Link>
+          </p>
+        )}
         <input
           ref={inputRef}
           type="file"
           multiple
-          accept=".pdf,.docx,.txt,.md,.png,.jpg,.jpeg,.tiff,.bmp,.webp"
+          accept={acceptTypes}
           className="hidden"
           onChange={(e) => void handleFiles(e.target.files)}
         />

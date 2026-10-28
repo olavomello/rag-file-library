@@ -38,11 +38,27 @@ def test_patch_persists_override_and_flags_restart(tmp_path: Path) -> None:
         assert body["requires_reindex"] is False
         assert "Restart" in body["message"]
 
-        # GET still reflects the running config until a restart applies the override.
-        assert client.get(SETTINGS).json()["chunk_size"] == 500
+        # GET reflects the saved override immediately (the effective-after-restart
+        # view), so a saved change is visible without waiting for a restart.
+        assert client.get(SETTINGS).json()["chunk_size"] == 900
 
     # The override is persisted to the config directory.
     assert JsonSettingsOverridesStore(settings.config_dir).load() == {"chunk_size": 900}
+
+
+def test_patch_ocr_enabled_is_saved_and_reflected(tmp_path: Path) -> None:
+    settings = _settings(tmp_path)
+    with TestClient(create_app(settings=settings)) as client:
+        assert client.get(SETTINGS).json()["ocr_enabled"] is True  # on by default
+
+        body = client.patch(SETTINGS, json={"ocr_enabled": False}).json()
+        assert body["settings"]["ocr_enabled"] is False
+        assert body["requires_restart"] is True
+
+        # The saved value is reflected on the next GET (no restart needed to see it).
+        assert client.get(SETTINGS).json()["ocr_enabled"] is False
+
+    assert JsonSettingsOverridesStore(settings.config_dir).load() == {"ocr_enabled": False}
 
 
 def test_patch_embedding_model_requires_reindex(tmp_path: Path) -> None:

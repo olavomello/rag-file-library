@@ -17,6 +17,7 @@ from private_rag.application.use_cases.documents.upload_document import (
 from private_rag.domain.entities.document import Document
 from private_rag.domain.entities.indexing_job import IndexingJob
 from private_rag.domain.exceptions import DocumentNotFoundError, DuplicateDocumentError
+from private_rag.domain.services.hashing import sha256_hex
 from private_rag.domain.value_objects.document_status import DocumentStatus
 
 NOW = datetime(2026, 3, 1, 8, 0, tzinfo=UTC)
@@ -161,6 +162,74 @@ class TestUploadDocument:
         assert second.is_duplicate is True
         assert second.document.id == first.document.id
         assert len(storage.files) == 1  # no second copy stored
+
+    def test_failed_duplicate_is_replaced_and_retried(self) -> None:
+        documents = FakeDocumentRepository()
+        chunks = FakeChunkRepository()
+        jobs = FakeJobRepository()
+        storage = FakeFileStore()
+        delete = DeleteDocumentUseCase(
+            documents=documents, chunks=chunks, jobs=jobs, storage=storage
+        )
+        use_case = UploadDocumentUseCase(
+            documents=documents,
+            storage=storage,
+            clock=FixedClock(),
+            max_upload_size_bytes=1024,
+            delete=delete,
+        )
+
+        data = b"retry me"
+        failed = Document.create(
+            original_name="old.txt",
+            stored_name="old.txt",
+            mime_type="text/plain",
+            extension=".txt",
+            size_bytes=len(data),
+            checksum_sha256=sha256_hex(data),
+            now=NOW,
+            document_id="failed-1",
+        )
+        failed.mark_failed(now=NOW, error_message="boom")
+        documents.add(failed)
+        storage.save("old.txt", data)
+        jobs.add(IndexingJob.create(document_id="failed-1", job_id="job-failed"))
+
+        result = use_case.execute(filename="old.txt", data=data)
+
+        # A fresh document is created (not reported as a duplicate)...
+        assert result.is_duplicate is False
+        assert result.document.id != "failed-1"
+        assert result.document.status is DocumentStatus.UPLOADED
+        # ...and the prior failed attempt and its derived data are gone.
+        assert "failed-1" not in documents.by_id
+        assert jobs.get_by_document("failed-1") is None
+        assert chunks.deleted == ["failed-1"]
+        assert "old.txt" not in storage.files
+        assert len(storage.files) == 1
+
+    def test_indexed_duplicate_is_not_replaced(self) -> None:
+        documents = FakeDocumentRepository()
+        storage = FakeFileStore()
+        delete = DeleteDocumentUseCase(
+            documents=documents,
+            chunks=FakeChunkRepository(),
+            jobs=FakeJobRepository(),
+            storage=storage,
+        )
+        use_case = UploadDocumentUseCase(
+            documents=documents,
+            storage=storage,
+            clock=FixedClock(),
+            max_upload_size_bytes=1024,
+            delete=delete,
+        )
+
+        first = use_case.execute(filename="a.txt", data=b"same bytes")
+        second = use_case.execute(filename="a.txt", data=b"same bytes")
+
+        assert second.is_duplicate is True
+        assert second.document.id == first.document.id
 
     def test_unsupported_type_rejected_before_storage(self) -> None:
         storage = FakeFileStore()

@@ -87,6 +87,29 @@ class Container:
     def settings(self) -> Settings:
         return self._settings
 
+    def reload_generation(self, effective: Settings) -> None:
+        """Apply generation model/option changes to the running process, no restart.
+
+        Only the generation provider and the objects that depend on it are rebuilt
+        (lazily, on next access). The embedding pipeline, Chroma client, and the
+        indexing worker are deliberately left untouched — those still apply on a
+        restart, so this hot-reload stays safe.
+        """
+        self._settings = self._settings.model_copy(
+            update={
+                "ollama_generation_model": effective.ollama_generation_model,
+                "ollama_temperature": effective.ollama_temperature,
+                "ollama_max_output_tokens": effective.ollama_max_output_tokens,
+                "ollama_context_window": effective.ollama_context_window,
+            }
+        )
+        for cached in (
+            "generation_provider",
+            "answer_question_use_case",
+            "get_dashboard_stats_use_case",
+        ):
+            self.__dict__.pop(cached, None)
+
     # --- Infrastructure singletons ---
 
     @cached_property

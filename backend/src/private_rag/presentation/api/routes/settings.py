@@ -39,6 +39,9 @@ async def update_settings(
     result = await asyncio.to_thread(
         container.update_settings_use_case.execute, patch
     )
+    # Generation model/options take effect immediately, without a restart.
+    if result.live_reload:
+        container.reload_generation(result.settings)
     return SettingsUpdateResponse(
         settings=SettingsResponse.from_settings(result.settings),
         requires_restart=result.requires_restart,

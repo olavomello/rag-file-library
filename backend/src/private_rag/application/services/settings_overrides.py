@@ -31,6 +31,13 @@ OVERRIDABLE_FIELDS: dict[str, str] = {
     "ocr_enabled": "ocr_enabled",
 }
 
+# Public override keys that can be applied to the running process without a
+# restart — only the generation model and its sampling options, which affect just
+# the generation provider (not the embedding pipeline, Chroma, or the worker).
+LIVE_APPLIABLE_FIELDS: frozenset[str] = frozenset(
+    {"generation_model", "temperature", "max_output_tokens", "context_window"}
+)
+
 
 def filter_overridable(overrides: Mapping[str, Any]) -> dict[str, Any]:
     """Keep only recognised, non-null override keys."""

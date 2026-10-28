@@ -95,6 +95,7 @@ export function SettingsPage(): JSX.Element {
       setOcrEnabled(response.settings.ocr_enabled);
       queryClient.invalidateQueries({ queryKey: ['settings'] });
       queryClient.invalidateQueries({ queryKey: ['models'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
     },
     onError: (err) => {
       setResult(null);

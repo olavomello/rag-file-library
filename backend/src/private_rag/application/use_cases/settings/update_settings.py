@@ -11,6 +11,7 @@ from private_rag.application.dto.settings import UpdateSettingsResult
 from private_rag.application.exceptions import InvalidSettingsError
 from private_rag.application.ports.settings_overrides import SettingsOverridesStore
 from private_rag.application.services.settings_overrides import (
+    LIVE_APPLIABLE_FIELDS,
     OVERRIDABLE_FIELDS,
     apply_overrides,
     filter_overridable,
@@ -51,19 +52,29 @@ class UpdateSettingsUseCase:
             "embedding_model" in cleaned
             and cleaned["embedding_model"] != self._settings.ollama_embedding_model
         )
+        # Generation model/options apply to the running process immediately; any
+        # other change still needs a restart.
+        live_reload = any(key in LIVE_APPLIABLE_FIELDS for key in changed)
+        requires_restart = any(key not in LIVE_APPLIABLE_FIELDS for key in changed)
 
         return UpdateSettingsResult(
             settings=effective,
-            requires_restart=bool(changed),
+            requires_restart=requires_restart,
             requires_reindex=requires_reindex,
-            message=self._message(changed, requires_reindex),
+            message=self._message(changed, requires_restart, requires_reindex),
+            live_reload=live_reload,
         )
 
     @staticmethod
-    def _message(changed: list[str], requires_reindex: bool) -> str:
+    def _message(
+        changed: list[str], requires_restart: bool, requires_reindex: bool
+    ) -> str:
         if not changed:
             return "No changes applied."
-        parts = ["Settings saved. Restart the application for changes to take effect."]
+        if requires_restart:
+            parts = ["Settings saved. Restart the application for changes to take effect."]
+        else:
+            parts = ["Settings saved and applied."]
         if requires_reindex:
             parts.append(
                 "Changing the embedding model requires re-indexing all documents, "

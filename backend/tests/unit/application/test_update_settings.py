@@ -59,6 +59,27 @@ class TestOcrEnabledUpdate:
         assert store.data == {"ocr_enabled": False}
 
 
+class TestGenerationLiveReload:
+    def test_generation_model_applies_without_restart(self) -> None:
+        store = FakeStore()
+        result = UpdateSettingsUseCase(store=store, settings=_base()).execute(
+            {"generation_model": "qwen3:1.7b"}
+        )
+        assert result.settings.ollama_generation_model == "qwen3:1.7b"
+        assert result.live_reload is True
+        assert result.requires_restart is False
+        assert "applied" in result.message
+        assert store.data == {"generation_model": "qwen3:1.7b"}
+
+    def test_temperature_is_live_but_chunk_size_needs_restart(self) -> None:
+        result = UpdateSettingsUseCase(store=FakeStore(), settings=_base()).execute(
+            {"temperature": 0.7, "chunk_size": 900}
+        )
+        # A non-live field is in the patch, so a restart is still required overall.
+        assert result.live_reload is True
+        assert result.requires_restart is True
+
+
 class TestUpdateSettingsUseCase:
     def test_change_requires_restart_and_persists(self) -> None:
         store = FakeStore()

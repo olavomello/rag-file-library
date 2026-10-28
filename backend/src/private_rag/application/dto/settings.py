@@ -15,3 +15,6 @@ class UpdateSettingsResult:
     requires_restart: bool
     requires_reindex: bool
     message: str
+    # True when a changed field can be applied to the running process immediately
+    # (the generation model/options), so no restart is needed for it.
+    live_reload: bool = False

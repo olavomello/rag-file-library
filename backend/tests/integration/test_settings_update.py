@@ -61,6 +61,20 @@ def test_patch_ocr_enabled_is_saved_and_reflected(tmp_path: Path) -> None:
     assert JsonSettingsOverridesStore(settings.config_dir).load() == {"ocr_enabled": False}
 
 
+def test_generation_model_applies_live_without_restart(tmp_path: Path) -> None:
+    settings = _settings(tmp_path)
+    with TestClient(create_app(settings=settings)) as client:
+        assert client.get("/api/v1/models/status").json()["generation_model"] == "qwen3:0.6b"
+
+        body = client.patch(SETTINGS, json={"generation_model": "qwen3:1.7b"}).json()
+        assert body["requires_restart"] is False
+        assert body["settings"]["generation_model"] == "qwen3:1.7b"
+
+        # Reflected in the running process immediately — no restart needed.
+        assert client.get("/api/v1/models/status").json()["generation_model"] == "qwen3:1.7b"
+        assert client.get("/api/v1/dashboard/stats").json()["generation_model"] == "qwen3:1.7b"
+
+
 def test_patch_embedding_model_requires_reindex(tmp_path: Path) -> None:
     with TestClient(create_app(settings=_settings(tmp_path))) as client:
         body = client.patch(SETTINGS, json={"embedding_model": "nomic-embed-text"}).json()

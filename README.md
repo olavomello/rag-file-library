@@ -1,6 +1,16 @@
+<div align="center">
+
+<img src="docs/assets/hero.png" alt="Private RAG" width="880">
+
 # Private RAG
 
-**Local AI Knowledge Management & Intelligent Document Search.**
+**Local AI Knowledge Management & Intelligent Document Search**
+
+Chat with your own files using 100% local AI — no cloud, no paid APIs, nothing leaves your machine.
+
+<img src="docs/assets/screenshot-chat.jpg" alt="Private RAG — AI Chat" width="880">
+
+</div>
 
 Private RAG is a fully local document-intelligence application. Upload documents,
 index their contents, run semantic searches, locate original files, and ask natural
